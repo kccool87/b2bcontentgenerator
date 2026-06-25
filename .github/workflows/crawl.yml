@@ -1,0 +1,77 @@
+name: 콘텐츠 자동 업데이트
+
+on:
+  schedule:
+    # 매주 월·수·금 18:00 KST (= 09:00 UTC)
+    - cron: '0 9 * * 1,3,5'
+  workflow_dispatch:  # 수동 실행 허용
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: crawl-and-deploy
+  cancel-in-progress: false
+
+jobs:
+  crawl-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. 저장소 체크아웃 ─────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Node.js 설정 ─────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── 3. 크롤링 실행 ───────────────────────────────────────────────
+      - name: Run crawler
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node scripts/crawl.js
+
+      # ── 4. 변경사항 확인 ─────────────────────────────────────────────
+      - name: Check for content changes
+        id: diff
+        run: |
+          git diff --quiet src/data/contentData.js \
+            && echo "changed=false" >> $GITHUB_OUTPUT \
+            || echo "changed=true"  >> $GITHUB_OUTPUT
+
+      # ── 5. 변경 시 커밋 ──────────────────────────────────────────────
+      - name: Commit updated contentData
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/contentData.js
+          git commit -m "chore: 콘텐츠 자동 업데이트 $(TZ='Asia/Seoul' date '+%Y-%m-%d %H:%M KST')"
+          git push
+
+      # ── 6. 빌드 ──────────────────────────────────────────────────────
+      - name: Build
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+        run: npm run build
+
+      # ── 7. GitHub Pages 배포 ─────────────────────────────────────────
+      - name: Deploy to GitHub Pages
+        if: steps.diff.outputs.changed == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          commit_message: "deploy: 콘텐츠 자동 업데이트 배포"
