@@ -58,7 +58,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   const [activeType, setActiveType] = useState(null);
 
   function toggleFilter(type) {
-    setActiveType((prev) => (prev === type ? null : type));
+    setActiveType(type);
     onTabClick?.();
   }
 
@@ -131,7 +131,11 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   // 타입 필터: 검색 시 전체 결과에서 필터, 전체보기 시 표시 결과에서 필터
   const filterSource = activeType && allResults ? allResults : results;
-  const filtered = activeType ? filterSource.filter((r) => r.type === activeType) : results;
+  const baseFiltered = activeType ? filterSource.filter((r) => r.type === activeType) : results;
+  // AX_TREND는 최신순(id 내림차순) 정렬
+  const filtered = activeType === 'AX_TREND'
+    ? [...baseFiltered].sort((a, b) => b.id.localeCompare(a.id))
+    : baseFiltered;
 
   return (
     <>

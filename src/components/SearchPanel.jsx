@@ -1,13 +1,16 @@
-export default function SearchPanel({ query, setQuery }) {
+export default function SearchPanel({ query, setQuery, onReset }) {
   return (
     <div className="search-panel">
-      <p className="search-headline">
-        <svg className="search-headline-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="2"/>
-          <path d="M13 13L17 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-        키워드 하나로 고객 맞춤 콘텐츠를 찾아보세요.
-      </p>
+      <div className="search-panel-top">
+        <p className="search-headline">
+          <svg className="search-headline-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="2"/>
+            <path d="M13 13L17 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          키워드 하나로 고객 맞춤 콘텐츠를 찾아보세요.
+        </p>
+        <button className="reset-all-btn" onClick={onReset} aria-label="전체 초기화">초기화</button>
+      </div>
 
       <div className="search-bar-wrap">
         <input

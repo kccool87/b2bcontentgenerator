@@ -82,6 +82,8 @@ export default function App() {
   const selectedContents = contentData.filter((item) => selectedIds.has(item.id));
 
   function handleReset() {
+    setQuery('');
+    setShowAll(true);
     setSelectedIds(new Set());
     resetGemini();
   }
@@ -113,7 +115,7 @@ export default function App() {
 
         <main className="app-main">
           <section className="left-panel">
-            <SearchPanel query={query} setQuery={handleSetQuery} />
+            <SearchPanel query={query} setQuery={handleSetQuery} onReset={handleReset} />
 
             {showResultCount && (
               <p className="result-count">

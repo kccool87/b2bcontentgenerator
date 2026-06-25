@@ -188,6 +188,31 @@ ol, ul { list-style: none; }
   flex-shrink: 0;
 }
 
+.search-panel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reset-all-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand);
+  background: transparent;
+  border: 1.5px solid var(--brand);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.reset-all-btn:hover {
+  background: var(--brand);
+  color: #fff;
+}
+
 .search-headline {
   font-size: 15px;
   font-weight: 700;
