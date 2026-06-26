@@ -93,29 +93,48 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   const FilterBar = () => (
     <div className="type-filter-bar">
-      <button
-        className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
-        onClick={() => { onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); }}
-      >
-        전체보기 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
-      </button>
+      <div className="type-filter-tabs">
+        <button
+          className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
+          onClick={() => { onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); }}
+        >
+          전체보기 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
+        </button>
 
-      {FILTER_TYPES.map((type) => {
-        const meta     = TYPE_META[type];
-        const count    = counts[type] ?? 0;
-        const isActive = activeType === type;
-        const disabled = count === 0 && !isInitial;
-        return (
-          <button
-            key={type}
-            className={`type-filter-btn ${meta.filter}${isActive ? ' type-filter-btn--active' : ''}${disabled ? ' type-filter-btn--empty' : ''}`}
-            onClick={() => toggleFilter(type)}
-            disabled={disabled}
-          >
-            {meta.label} {count > 0 && <span className="filter-btn-count">{count}</span>}
-          </button>
-        );
-      })}
+        {FILTER_TYPES.map((type) => {
+          const meta     = TYPE_META[type];
+          const count    = counts[type] ?? 0;
+          const isActive = activeType === type;
+          const disabled = count === 0 && !isInitial;
+          return (
+            <button
+              key={type}
+              className={`type-filter-btn ${meta.filter}${isActive ? ' type-filter-btn--active' : ''}${disabled ? ' type-filter-btn--empty' : ''}`}
+              onClick={() => toggleFilter(type)}
+              disabled={disabled}
+            >
+              {meta.label} {count > 0 && <span className="filter-btn-count">{count}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="sort-bar">
+        <button
+          className={`sort-btn${sortMode === 'latest' ? ' sort-btn--active' : ''}`}
+          onClick={() => setSortMode(sortMode === 'latest' ? null : 'latest')}
+        >
+          최신순
+        </button>
+        <button
+          className={`sort-btn${sortMode === 'relevance' ? ' sort-btn--active' : ''}`}
+          onClick={() => hasQuery && setSortMode(sortMode === 'relevance' ? null : 'relevance')}
+          disabled={!hasQuery}
+          title={!hasQuery ? '검색 키워드를 입력하면 활성화됩니다' : undefined}
+        >
+          관련도순
+        </button>
+      </div>
     </div>
   );
 
@@ -150,12 +169,18 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   // 정렬 적용
   let filtered;
-  if (sortMode === 'latest' && activeType) {
-    const order = ORDER_MAP[activeType] ?? [];
+  if (sortMode === 'latest') {
     filtered = [...baseFiltered].sort((a, b) => {
+      const order = ORDER_MAP[a.type] ?? [];
       const ai = order.indexOf(a.id);
-      const bi = order.indexOf(b.id);
-      return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+      const orderB = ORDER_MAP[b.type] ?? [];
+      const bi = orderB.indexOf(b.id);
+      // 전체보기 시: 각 카테고리 내 순위 비교 (정규화)
+      const typeItems = (ORDER_MAP[a.type] ?? []).length || 1;
+      const typeBItems = (ORDER_MAP[b.type] ?? []).length || 1;
+      const ra = ai === -1 ? 1 : ai / typeItems;
+      const rb = bi === -1 ? 1 : bi / typeBItems;
+      return ra - rb;
     });
   } else if (sortMode === 'relevance' && hasQuery) {
     const keywords = query.trim().toLowerCase().split(/\s+/);
@@ -167,25 +192,6 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   return (
     <>
       <FilterBar />
-
-      {activeType && (
-        <div className="sort-bar">
-          <button
-            className={`sort-btn${sortMode === 'latest' ? ' sort-btn--active' : ''}`}
-            onClick={() => setSortMode(sortMode === 'latest' ? null : 'latest')}
-          >
-            최신순
-          </button>
-          <button
-            className={`sort-btn${sortMode === 'relevance' ? ' sort-btn--active' : ''}${!hasQuery ? ' sort-btn--disabled' : ''}`}
-            onClick={() => hasQuery && setSortMode(sortMode === 'relevance' ? null : 'relevance')}
-            disabled={!hasQuery}
-            title={!hasQuery ? '검색 키워드를 입력하면 활성화됩니다' : undefined}
-          >
-            관련도순
-          </button>
-        </div>
-      )}
 
       <div className="cards-container">
         {filtered.length === 0 ? (
