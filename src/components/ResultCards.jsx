@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AX_TREND_ORDER } from '../data/axTrendOrder.js';
 
 const TYPE_META = {
   INSIGHT:   { label: '인사이트',   cls: 'type-badge--insight',   filter: 'type-filter--insight' },
@@ -132,9 +133,15 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   // 타입 필터: 검색 시 전체 결과에서 필터, 전체보기 시 표시 결과에서 필터
   const filterSource = activeType && allResults ? allResults : results;
   const baseFiltered = activeType ? filterSource.filter((r) => r.type === activeType) : results;
-  // AX_TREND는 최신순(id 내림차순) 정렬
+  // AX_TREND는 실제 사이트 최신 등록순으로 정렬
   const filtered = activeType === 'AX_TREND'
-    ? [...baseFiltered].sort((a, b) => b.id.localeCompare(a.id))
+    ? [...baseFiltered].sort((a, b) => {
+        const ai = AX_TREND_ORDER.indexOf(a.id);
+        const bi = AX_TREND_ORDER.indexOf(b.id);
+        const ar = ai === -1 ? Infinity : ai;
+        const br = bi === -1 ? Infinity : bi;
+        return ar - br;
+      })
     : baseFiltered;
 
   return (
