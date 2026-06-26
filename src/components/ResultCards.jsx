@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AX_TREND_ORDER } from '../data/axTrendOrder.js';
+import { INSIGHT_ORDER, SOLUTION_ORDER, CHECKLIST_ORDER, CASE_ORDER, AX_TREND_ORDER } from '../data/contentOrder.js';
 
 const TYPE_META = {
   INSIGHT:   { label: '인사이트',   cls: 'type-badge--insight',   filter: 'type-filter--insight' },
@@ -16,16 +16,21 @@ const STAGE_CLASS = {
   '내부설득': 'stage--pitch',
 };
 
-// 요청된 버튼 순서 (전체보기 제외)
+const ORDER_MAP = {
+  INSIGHT:   INSIGHT_ORDER,
+  SOLUTION:  SOLUTION_ORDER,
+  CHECKLIST: CHECKLIST_ORDER,
+  CASE:      CASE_ORDER,
+  AX_TREND:  AX_TREND_ORDER,
+};
+
 const FILTER_TYPES = ['INSIGHT', 'SOLUTION', 'CHECKLIST', 'CASE', 'AX_TREND'];
 
 const MAX_SUMMARY = 130;
 
-// 문장 경계(마침표·다·요·까 뒤)에서 130자 이내로 압축
 function trimSummary(text) {
   if (!text || text.length <= MAX_SUMMARY) return text;
   const chunk = text.slice(0, MAX_SUMMARY);
-  // 마침표 계열로 끝나는 마지막 위치
   const sentenceEnd = Math.max(
     chunk.lastIndexOf('다.'),
     chunk.lastIndexOf('요.'),
@@ -40,9 +45,19 @@ function trimSummary(text) {
     const cut = chunk.slice(0, sentenceEnd + 2).trimEnd();
     return cut.endsWith('.') || cut.endsWith('다') ? cut : cut;
   }
-  // fallback: 마지막 공백
   const lastSpace = chunk.lastIndexOf(' ');
   return lastSpace > MAX_SUMMARY * 0.6 ? chunk.slice(0, lastSpace) : chunk;
+}
+
+function relevanceScore(item, keywords) {
+  const text = [
+    item.title, item.summary, item.recommendReason,
+    ...item.products, ...item.industries,
+  ].join(' ').toLowerCase();
+  return keywords.reduce((acc, kw) => {
+    const matches = text.match(new RegExp(kw, 'g'));
+    return acc + (matches?.length ?? 0);
+  }, 0);
 }
 
 function SkeletonGrid() {
@@ -55,15 +70,16 @@ function SkeletonGrid() {
   );
 }
 
-export default function ResultCards({ results, allResults, selectedIds, onToggle, isInitial, showAll, onToggleAll, onTabClick }) {
+export default function ResultCards({ results, allResults, selectedIds, onToggle, isInitial, showAll, onToggleAll, onTabClick, query }) {
   const [activeType, setActiveType] = useState(null);
+  const [sortMode, setSortMode] = useState(null); // null=랜덤, 'latest', 'relevance'
 
   function toggleFilter(type) {
     setActiveType(type);
+    setSortMode(null);
     onTabClick?.();
   }
 
-  // 타입별 개수: 검색 시 전체 결과 기준, 전체보기 시 표시 결과 기준
   const countSource = allResults ?? results;
   const counts = {};
   if (countSource) {
@@ -73,17 +89,17 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   }
   const totalCount = results?.length ?? 0;
 
+  const hasQuery = Boolean(query?.trim());
+
   const FilterBar = () => (
     <div className="type-filter-bar">
-      {/* 전체보기 버튼 */}
       <button
         className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
-        onClick={() => { onToggleAll(); setActiveType(null); onTabClick?.(); }}
+        onClick={() => { onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); }}
       >
         전체보기 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
       </button>
 
-      {/* 타입별 버튼 */}
       {FILTER_TYPES.map((type) => {
         const meta     = TYPE_META[type];
         const count    = counts[type] ?? 0;
@@ -103,7 +119,6 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
     </div>
   );
 
-  // 초기 상태 (검색어 없음 + 전체보기 아님)
   if (isInitial) {
     return (
       <>
@@ -115,7 +130,6 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
     );
   }
 
-  // 결과 없음
   if (!results || results.length === 0) {
     return (
       <>
@@ -130,23 +144,49 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
     );
   }
 
-  // 타입 필터: 검색 시 전체 결과에서 필터, 전체보기 시 표시 결과에서 필터
+  // 타입 필터
   const filterSource = activeType && allResults ? allResults : results;
   const baseFiltered = activeType ? filterSource.filter((r) => r.type === activeType) : results;
-  // AX_TREND는 실제 사이트 최신 등록순으로 정렬
-  const filtered = activeType === 'AX_TREND'
-    ? [...baseFiltered].sort((a, b) => {
-        const ai = AX_TREND_ORDER.indexOf(a.id);
-        const bi = AX_TREND_ORDER.indexOf(b.id);
-        const ar = ai === -1 ? Infinity : ai;
-        const br = bi === -1 ? Infinity : bi;
-        return ar - br;
-      })
-    : baseFiltered;
+
+  // 정렬 적용
+  let filtered;
+  if (sortMode === 'latest' && activeType) {
+    const order = ORDER_MAP[activeType] ?? [];
+    filtered = [...baseFiltered].sort((a, b) => {
+      const ai = order.indexOf(a.id);
+      const bi = order.indexOf(b.id);
+      return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+    });
+  } else if (sortMode === 'relevance' && hasQuery) {
+    const keywords = query.trim().toLowerCase().split(/\s+/);
+    filtered = [...baseFiltered].sort((a, b) => relevanceScore(b, keywords) - relevanceScore(a, keywords));
+  } else {
+    filtered = baseFiltered;
+  }
 
   return (
     <>
       <FilterBar />
+
+      {activeType && (
+        <div className="sort-bar">
+          <button
+            className={`sort-btn${sortMode === 'latest' ? ' sort-btn--active' : ''}`}
+            onClick={() => setSortMode(sortMode === 'latest' ? null : 'latest')}
+          >
+            최신순
+          </button>
+          <button
+            className={`sort-btn${sortMode === 'relevance' ? ' sort-btn--active' : ''}${!hasQuery ? ' sort-btn--disabled' : ''}`}
+            onClick={() => hasQuery && setSortMode(sortMode === 'relevance' ? null : 'relevance')}
+            disabled={!hasQuery}
+            title={!hasQuery ? '검색 키워드를 입력하면 활성화됩니다' : undefined}
+          >
+            관련도순
+          </button>
+        </div>
+      )}
+
       <div className="cards-container">
         {filtered.length === 0 ? (
           <div className="no-results-msg">

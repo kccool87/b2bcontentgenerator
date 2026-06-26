@@ -213,6 +213,44 @@ ol, ul { list-style: none; }
   color: #fff;
 }
 
+/* 정렬 버튼 바 */
+.sort-bar {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin: -4px 0 8px;
+}
+.sort-btn {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.sort-btn:hover:not(:disabled) {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+.sort-btn--active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+.sort-btn--active:hover {
+  background: var(--brand);
+  color: #fff;
+}
+.sort-btn--disabled,
+.sort-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .search-headline {
   font-size: 15px;
   font-weight: 700;

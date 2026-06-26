@@ -139,6 +139,7 @@ export default function App() {
               showAll={showAll}
               onToggleAll={handleToggleAll}
               onTabClick={handleTabClick}
+              query={query}
             />
           </section>
 
