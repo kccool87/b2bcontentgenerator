@@ -432,6 +432,8 @@ ol, ul { list-style: none; }
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--card-gap);
+  padding-top: 3px;   /* 첫 행 카드 hover translateY 클리핑 방지 */
+  margin-top: -3px;
 }
 
 .card-skeleton {

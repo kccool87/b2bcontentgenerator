@@ -105,7 +105,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
         className={`sort-btn${sortMode === 'relevance' ? ' sort-btn--active' : ''}`}
         onClick={() => hasQuery && setSortMode(sortMode === 'relevance' ? null : 'relevance')}
         disabled={!hasQuery}
-        data-tip={hasQuery ? '검색 키워드 최적화순으로 보기' : '검색어를 입력하면 활성화됩니다'}
+        data-tip={hasQuery ? '검색 키워드 관련도순으로 보기' : '검색어를 입력하면 활성화됩니다'}
       >
         {sortMode === 'relevance' && <span className="sort-check">✓</span>}
         관련도순
