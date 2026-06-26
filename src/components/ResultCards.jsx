@@ -171,16 +171,9 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   let filtered;
   if (sortMode === 'latest') {
     filtered = [...baseFiltered].sort((a, b) => {
-      const order = ORDER_MAP[a.type] ?? [];
-      const ai = order.indexOf(a.id);
-      const orderB = ORDER_MAP[b.type] ?? [];
-      const bi = orderB.indexOf(b.id);
-      // 전체보기 시: 각 카테고리 내 순위 비교 (정규화)
-      const typeItems = (ORDER_MAP[a.type] ?? []).length || 1;
-      const typeBItems = (ORDER_MAP[b.type] ?? []).length || 1;
-      const ra = ai === -1 ? 1 : ai / typeItems;
-      const rb = bi === -1 ? 1 : bi / typeBItems;
-      return ra - rb;
+      const ia = (ORDER_MAP[a.type] ?? []).indexOf(a.id);
+      const ib = (ORDER_MAP[b.type] ?? []).indexOf(b.id);
+      return (ia === -1 ? Infinity : ia) - (ib === -1 ? Infinity : ib);
     });
   } else if (sortMode === 'relevance' && hasQuery) {
     const keywords = query.trim().toLowerCase().split(/\s+/);
