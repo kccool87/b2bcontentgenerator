@@ -8,7 +8,7 @@ export function formatEmailCopy(contents) {
   const body = contents
     .map(
       (item, i) =>
-        `${num(i)} ${item.title}\n- ${item.summary}\n${item.url}`
+        `${num(i)} ${item.summary}\n${item.url}`
     )
     .join('\n\n');
 
