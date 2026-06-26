@@ -218,10 +218,17 @@ ol, ul { list-style: none; }
   display: flex;
   gap: 4px;
   justify-content: flex-end;
+  align-items: center;
   margin-top: 6px;
   flex-shrink: 0;
 }
+
+/* 정렬 버튼 */
 .sort-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 3px 9px;
   font-size: 11px;
   font-weight: 600;
@@ -230,26 +237,57 @@ ol, ul { list-style: none; }
   border: 1.5px solid var(--border);
   border-radius: 20px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
   white-space: nowrap;
   line-height: 1.6;
+  user-select: none;
 }
 .sort-btn:hover:not(:disabled) {
   border-color: var(--brand);
   color: var(--brand);
 }
+
+/* 활성 상태: 채워진 배경 + 체크 아이콘 + 글로우 */
 .sort-btn--active {
   background: var(--brand);
   border-color: var(--brand);
   color: #fff;
+  box-shadow: 0 0 0 3px var(--brand-glow);
 }
 .sort-btn--active:hover {
-  background: var(--brand);
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
   color: #fff;
 }
+
+/* 비활성 disabled */
 .sort-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+}
+
+/* CSS 툴팁 */
+.sort-btn[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  right: 0;
+  background: rgba(20, 20, 20, 0.88);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 50;
+}
+.sort-btn[data-tip]:hover::after {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .search-headline {
@@ -317,12 +355,15 @@ ol, ul { list-style: none; }
   flex-shrink: 0;
   flex-wrap: nowrap;
   overflow-x: auto;
+  overflow-y: visible;       /* hover translateY 클리핑 방지 */
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  padding-top: 3px;          /* translateY(-1px) hover 공간 확보 */
+  margin-top: -3px;
 }
 .type-filter-bar::-webkit-scrollbar { display: none; }
 .type-filter-tabs {
-  display: contents; /* 내부 버튼들을 type-filter-bar 직속 자식처럼 배치 */
+  display: contents;
 }
 
 .type-filter-btn {
