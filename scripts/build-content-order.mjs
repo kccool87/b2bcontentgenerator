@@ -6,12 +6,14 @@ import { contentData } from '../src/data/contentData.js';
 
 const BASE = 'https://lguplusenterprise.com';
 
+// reverseP1: AX_TREND만 페이지1 HTML이 최신→오래된 역순으로 렌더링됨
+// 나머지 카테고리는 HTML 순서 = 최신순(정방향)
 const CATEGORIES = [
-  { key: 'INSIGHT',   path: '/category/insight/',                           type: 'INSIGHT'   },
-  { key: 'SOLUTION',  path: '/category/solution/enterprise-solution/',      type: 'SOLUTION'  },
-  { key: 'CHECKLIST', path: '/category/checklist/',                         type: 'CHECKLIST' },
-  { key: 'CASE',      path: '/category/case-study/',                        type: 'CASE'      },
-  { key: 'AX_TREND',  path: '/category/ax-trend/',                          type: 'AX_TREND'  },
+  { key: 'INSIGHT',   path: '/category/insight/',                           type: 'INSIGHT',   reverseP1: false },
+  { key: 'SOLUTION',  path: '/category/solution/enterprise-solution/',      type: 'SOLUTION',  reverseP1: false },
+  { key: 'CHECKLIST', path: '/category/checklist/',                         type: 'CHECKLIST', reverseP1: false },
+  { key: 'CASE',      path: '/category/case-study/',                        type: 'CASE',      reverseP1: false },
+  { key: 'AX_TREND',  path: '/category/ax-trend/',                          type: 'AX_TREND',  reverseP1: true  },
 ];
 
 // 타입별 슬러그 → ID 맵
@@ -25,7 +27,7 @@ function buildSlugMap(type) {
   return map;
 }
 
-async function fetchPageSlugs(catPath, pageNum) {
+async function fetchPageSlugs(catPath, pageNum, reverseP1) {
   const url = `${BASE}${catPath}page/${pageNum}/`;
   let html;
   try {
@@ -54,8 +56,8 @@ async function fetchPageSlugs(catPath, pageNum) {
     }
   }
   if (slugs.length === 0) return null;
-  // 페이지 1은 HTML 순서가 최신→오래된 역순으로 렌더링됨
-  if (pageNum === 1) slugs.reverse();
+  // AX_TREND만 페이지1 HTML이 역순 — 나머지는 정방향
+  if (pageNum === 1 && reverseP1) slugs.reverse();
   return slugs;
 }
 
@@ -67,7 +69,7 @@ async function buildOrder(cat) {
 
   process.stderr.write(`\n[${cat.key}] 수집 중...\n`);
   for (let page = 1; page <= 30; page++) {
-    const slugs = await fetchPageSlugs(cat.path, page);
+    const slugs = await fetchPageSlugs(cat.path, page, cat.reverseP1);
     if (!slugs) { process.stderr.write(`  페이지 ${page}: 종료\n`); break; }
     process.stderr.write(`  페이지 ${page}: ${slugs.length}개\n`);
 

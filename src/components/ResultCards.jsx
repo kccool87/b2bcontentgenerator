@@ -91,6 +91,25 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   const hasQuery = Boolean(query?.trim());
 
+  const SortBar = () => (
+    <div className="sort-bar">
+      <button
+        className={`sort-btn${sortMode === 'latest' ? ' sort-btn--active' : ''}`}
+        onClick={() => setSortMode(sortMode === 'latest' ? null : 'latest')}
+      >
+        최신순
+      </button>
+      <button
+        className={`sort-btn${sortMode === 'relevance' ? ' sort-btn--active' : ''}`}
+        onClick={() => hasQuery && setSortMode(sortMode === 'relevance' ? null : 'relevance')}
+        disabled={!hasQuery}
+        title={!hasQuery ? '검색 키워드를 입력하면 활성화됩니다' : undefined}
+      >
+        관련도순
+      </button>
+    </div>
+  );
+
   const FilterBar = () => (
     <div className="type-filter-bar">
       <div className="type-filter-tabs">
@@ -118,23 +137,6 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
           );
         })}
       </div>
-
-      <div className="sort-bar">
-        <button
-          className={`sort-btn${sortMode === 'latest' ? ' sort-btn--active' : ''}`}
-          onClick={() => setSortMode(sortMode === 'latest' ? null : 'latest')}
-        >
-          최신순
-        </button>
-        <button
-          className={`sort-btn${sortMode === 'relevance' ? ' sort-btn--active' : ''}`}
-          onClick={() => hasQuery && setSortMode(sortMode === 'relevance' ? null : 'relevance')}
-          disabled={!hasQuery}
-          title={!hasQuery ? '검색 키워드를 입력하면 활성화됩니다' : undefined}
-        >
-          관련도순
-        </button>
-      </div>
     </div>
   );
 
@@ -142,6 +144,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
     return (
       <>
         <FilterBar />
+        <SortBar />
         <div className="cards-container">
           <SkeletonGrid />
         </div>
@@ -153,6 +156,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
     return (
       <>
         <FilterBar />
+        <SortBar />
         <div className="cards-container">
           <div className="no-results-msg">
             <p>일치하는 콘텐츠가 없습니다.</p>
@@ -185,6 +189,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   return (
     <>
       <FilterBar />
+      <SortBar />
 
       <div className="cards-container">
         {filtered.length === 0 ? (
