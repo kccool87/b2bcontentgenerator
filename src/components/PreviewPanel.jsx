@@ -10,6 +10,10 @@ const LOADING_PHASES = [
   '마무리 다듬는 중 ····',
 ];
 
+// ── 제목 정제 ───────────────────────────────────────────────────
+const TITLE_SUFFIX = / - LG Uplus Enterprise$/i;
+function ct(title) { return title ? title.replace(TITLE_SUFFIX, '') : title; }
+
 // ── URL 처리 ────────────────────────────────────────────────────
 function cleanUrl(url) {
   try { return decodeURIComponent(url); } catch { return url; }
@@ -26,30 +30,30 @@ function displayUrl(url) {
 
 // ── 포맷 함수 ──────────────────────────────────────────────────
 function buildPreviewTitleUrlBlock(items) {
-  return items.map((c, i) => `${num(i)} ${c.title}\n${displayUrl(c.url)}`).join('\n\n');
+  return items.map((c, i) => `${num(i)} ${ct(c.title)}\n${displayUrl(c.url)}`).join('\n\n');
 }
 
 function buildTitleUrlBlock(items) {
-  return items.map((c, i) => `${num(i)} ${c.title}\n${cleanUrl(c.url)}`).join('\n\n');
+  return items.map((c, i) => `${num(i)} ${ct(c.title)}\n${cleanUrl(c.url)}`).join('\n\n');
 }
 
 function buildFullCopy(items, intro) {
   const body = items
-    .map((c, i) => `${num(i)} ${c.title}\n- ${c.summary}\n${cleanUrl(c.url)}`)
+    .map((c, i) => `${num(i)} ${ct(c.title)}\n- ${c.summary}\n${cleanUrl(c.url)}`)
     .join('\n\n');
   return intro ? `${intro}\n\n${body}` : body;
 }
 
 function buildEmailCopy(items, intro) {
   const body = items
-    .map((c, i) => `${num(i)} ${c.title}\n- ${c.summary}\n${cleanUrl(c.url)}`)
+    .map((c, i) => `${num(i)} ${ct(c.title)}\n- ${c.summary}\n${cleanUrl(c.url)}`)
     .join('\n\n');
   const footer = '\n\n필요하시면 관련 상품 상담도 함께 도와드리겠습니다.';
   return intro ? `${intro}\n\n${body}${footer}` : `${body}${footer}`;
 }
 
 function buildKakaoCopy(items, intro) {
-  const body = items.map((c, i) => `${num(i)} ${c.title}\n🔗 ${cleanUrl(c.url)}`).join('\n\n');
+  const body = items.map((c, i) => `${num(i)} ${ct(c.title)}\n🔗 ${cleanUrl(c.url)}`).join('\n\n');
   return intro ? `${intro}\n\n${body}` : body;
 }
 
@@ -178,7 +182,7 @@ export default function PreviewPanel({
         {selectedContents.map((item) => (
           <div key={item.id} className="selected-item">
             <span className="selected-dot" />
-            <span className="selected-title">{item.title}</span>
+            <span className="selected-title">{ct(item.title)}</span>
             <button
               className="selected-remove"
               onClick={() => onRemove(item.id)}

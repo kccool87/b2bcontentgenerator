@@ -28,6 +28,11 @@ const FILTER_TYPES = ['INSIGHT', 'SOLUTION', 'CHECKLIST', 'CASE', 'AX_TREND'];
 
 const MAX_SUMMARY = 130;
 
+const TITLE_SUFFIX = / - LG Uplus Enterprise$/i;
+function cleanTitle(title) {
+  return title ? title.replace(TITLE_SUFFIX, '') : title;
+}
+
 function trimSummary(text) {
   if (!text || text.length <= MAX_SUMMARY) return text;
   const chunk = text.slice(0, MAX_SUMMARY);
@@ -223,7 +228,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
                     </div>
                   </div>
 
-                  <h3 className="card-title">{item.title}</h3>
+                  <h3 className="card-title">{cleanTitle(item.title)}</h3>
 
                   <div className="recommend-box">
                     <span className="recommend-icon">💡</span>
