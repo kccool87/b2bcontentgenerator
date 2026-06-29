@@ -4254,6 +4254,21 @@ export const contentData = [
     priority: 2,
     recommendReason: '보안 솔루션 검토 단계의 고객에게 실제 위협 사례와 함께 제시하면 도입 필요성을 직관적으로 전달할 수 있습니다.',
   },
+
+  // ── SOLUTION (2026-06-26 신규) ────────────────────────────
+  {
+    id: 'c328',
+    title: '핫스팟 대신 U+모바일인터넷, 현장 업무를 빠르게 이어가는 방법',
+    summary: '팝업스토어·공사 현장·야외 행사장 등 유선 인터넷 설치가 어려운 단기 업무 환경에서 U+모바일인터넷을 활용하면 핫스팟 발열·끊김 없이 결제·업무 시스템을 안정적으로 연결할 수 있습니다.',
+    url: 'https://lguplusenterprise.com/%ed%95%ab%ec%8a%a4%ed%8c%9f-%eb%8c%80%ec%8b%a0-u%eb%aa%a8%eb%b0%94%ec%9d%bc%ec%9d%b8%ed%84%b0%eb%84%b7-%ed%98%84%ec%9e%a5-%ec%97%85%eb%ac%b4%eb%a5%bc-%eb%b9%a0%eb%a5%b4%ea%b2%8c-%ec%9d%b4%ec%96%b4/',
+    type: 'SOLUTION',
+    products: ['U+모바일인터넷'],
+    industries: ['팝업스토어/행사', '건설', '소상공인', '유통'],
+    concerns: ['업무효율', '안정성'],
+    stage: '초기관심',
+    priority: 1,
+    recommendReason: '팝업스토어·이벤트·공사 현장처럼 단기 이동형 무선인터넷이 필요한 고객과의 첫 상담에서, 핫스팟 한계를 솔루션으로 전환하는 공감대 형성용으로 활용하세요.',
+  },
 ];
 
 export const PRODUCTS = [

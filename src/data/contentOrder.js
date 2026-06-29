@@ -33,6 +33,7 @@ export const INSIGHT_ORDER = [
 ];
 
 export const SOLUTION_ORDER = [
+  'c328',
   'c103',
   'c104',
   'c105',
