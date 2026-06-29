@@ -156,7 +156,7 @@ export default function PreviewPanel({
     },
     {
       key:     'kakao',
-      label:   '카카오용 복사',
+      label:   '메신저/문자용 복사',
       cls:     'copy-btn--kakao',
       getText: () => buildKakaoCopy(selectedContents, intro),
     },
