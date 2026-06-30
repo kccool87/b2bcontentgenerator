@@ -75,8 +75,8 @@ function SkeletonGrid() {
   );
 }
 
-const PAGE_INIT = 10;
-const PAGE_STEP = 6;
+const PAGE_INIT = 12;
+const PAGE_STEP = 10;
 
 export default function ResultCards({ results, allResults, selectedIds, onToggle, isInitial, showAll, onToggleAll, onTabClick, query }) {
   const [activeType, setActiveType] = useState(null);
