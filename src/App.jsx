@@ -108,7 +108,7 @@ export default function App() {
       <div className="app-container">
         <div className="page-title-area">
           <div className="app-title">
-            <img src={algoLogo} alt="U+ALGO" className="title-logo" onClick={handleReset} style={{cursor:'pointer'}} />
+            <img src={algoLogo} alt="U+ALGO" className="title-logo" onClick={() => { window.location.href = '/'; }} style={{cursor:'pointer'}} />
             <p className="title-sub">검색 <span style={{color:'#844ff9'}}>알고</span>리즘으로 콘텐츠를 <span style={{color:'#844ff9'}}>알고</span> — 세일즈로 잇다</p>
           </div>
         </div>
