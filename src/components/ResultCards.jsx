@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { INSIGHT_ORDER, SOLUTION_ORDER, CHECKLIST_ORDER, CASE_ORDER, AX_TREND_ORDER } from '../data/contentOrder.js';
 
 const TYPE_META = {
@@ -75,9 +75,16 @@ function SkeletonGrid() {
   );
 }
 
+const PAGE_INIT = 10;
+const PAGE_STEP = 5;
+
 export default function ResultCards({ results, allResults, selectedIds, onToggle, isInitial, showAll, onToggleAll, onTabClick, query }) {
   const [activeType, setActiveType] = useState(null);
   const [sortMode, setSortMode] = useState(null); // null=랜덤, 'latest', 'relevance'
+  const [visibleCount, setVisibleCount] = useState(PAGE_INIT);
+
+  // 탭·정렬·결과가 바뀔 때마다 노출 수 초기화
+  useEffect(() => { setVisibleCount(PAGE_INIT); }, [activeType, sortMode, results, showAll]);
 
   function toggleFilter(type) {
     setActiveType(type);
@@ -206,57 +213,69 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
             <p className="empty-hint">다른 필터를 선택하거나 전체보기를 해보세요.</p>
           </div>
         ) : (
-          <div className="cards-grid">
-            {filtered.map((item) => {
-              const selected = selectedIds.has(item.id);
-              const type     = TYPE_META[item.type] ?? { label: item.type, cls: '', filter: '' };
-              const stageCls = STAGE_CLASS[item.stage] ?? 'stage--init';
+          <>
+            <div className="cards-grid">
+              {filtered.slice(0, visibleCount).map((item) => {
+                const selected = selectedIds.has(item.id);
+                const type     = TYPE_META[item.type] ?? { label: item.type, cls: '', filter: '' };
+                const stageCls = STAGE_CLASS[item.stage] ?? 'stage--init';
 
-              return (
-                <div
-                  key={item.id}
-                  className={`content-card${selected ? ' content-card--selected' : ''}`}
-                  onClick={() => onToggle(item.id)}
-                  role="button"
-                  aria-pressed={selected}
+                return (
+                  <div
+                    key={item.id}
+                    className={`content-card${selected ? ' content-card--selected' : ''}`}
+                    onClick={() => onToggle(item.id)}
+                    role="button"
+                    aria-pressed={selected}
+                  >
+                    <div className="card-header">
+                      <span className={`type-badge ${type.cls}`}>{type.label}</span>
+                      <span className={`stage-badge ${stageCls}`}>{item.stage}</span>
+                      <div className={`card-check${selected ? ' card-check--on' : ''}`}>
+                        {selected ? '✓' : '+'}
+                      </div>
+                    </div>
+
+                    <h3 className="card-title">{cleanTitle(item.title)}</h3>
+
+                    <div className="recommend-box">
+                      <span className="recommend-icon">💡</span>
+                      <div className="recommend-body">
+                        <span className="recommend-label">활용 TIP</span>
+                        <span className="recommend-text">{item.recommendReason}</span>
+                      </div>
+                    </div>
+
+                    <p className="card-summary">
+                      <span className="summary-label">요약</span>
+                      {trimSummary(item.summary)}
+                    </p>
+
+                    <div className="card-footer">
+                      <div className="card-tags">
+                        {item.products.map((p) => (
+                          <span key={p} className="tag tag--product">{p}</span>
+                        ))}
+                        {item.industries.map((ind) => (
+                          <span key={ind} className="tag tag--industry">{ind}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {visibleCount < filtered.length && (
+              <div className="load-more-wrap">
+                <button
+                  className="load-more-btn"
+                  onClick={() => setVisibleCount((v) => v + PAGE_STEP)}
                 >
-                  <div className="card-header">
-                    <span className={`type-badge ${type.cls}`}>{type.label}</span>
-                    <span className={`stage-badge ${stageCls}`}>{item.stage}</span>
-                    <div className={`card-check${selected ? ' card-check--on' : ''}`}>
-                      {selected ? '✓' : '+'}
-                    </div>
-                  </div>
-
-                  <h3 className="card-title">{cleanTitle(item.title)}</h3>
-
-                  <div className="recommend-box">
-                    <span className="recommend-icon">💡</span>
-                    <div className="recommend-body">
-                      <span className="recommend-label">활용 TIP</span>
-                      <span className="recommend-text">{item.recommendReason}</span>
-                    </div>
-                  </div>
-
-                  <p className="card-summary">
-                    <span className="summary-label">요약</span>
-                    {trimSummary(item.summary)}
-                  </p>
-
-                  <div className="card-footer">
-                    <div className="card-tags">
-                      {item.products.map((p) => (
-                        <span key={p} className="tag tag--product">{p}</span>
-                      ))}
-                      {item.industries.map((ind) => (
-                        <span key={ind} className="tag tag--industry">{ind}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  더보기 <span className="load-more-remain">({filtered.length - visibleCount}개 남음)</span>
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>
