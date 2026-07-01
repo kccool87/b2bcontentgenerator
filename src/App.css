@@ -818,25 +818,49 @@ ol, ul { list-style: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 13px; color: var(--text-3); font-weight: 500; }
 
-.copy-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0; }
-
-.copy-btn {
-  color: #fff;
-  padding: 10px 8px;
-  border-radius: var(--r-md);
+/* 포맷 탭 바 */
+.format-tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+}
+.format-tab {
+  flex: 1;
+  padding: 8px 4px;
   font-size: 12px;
   font-weight: 600;
-  text-align: center;
-  line-height: 1.3;
-  transition: filter 0.15s, transform 0.1s;
+  color: var(--text-3);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
-.copy-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
-.copy-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-.copy-btn--done  { background: #10b981 !important; filter: none !important; }
-.copy-btn--full  { background: #82817d; }
-.copy-btn--url   { background: #82817d; }
-.copy-btn--email { background: #82817d; }
-.copy-btn--kakao { background: #82817d; }
+.format-tab:hover { color: var(--brand); }
+.format-tab--active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+}
+
+/* 단일 복사 버튼 */
+.copy-single-btn {
+  flex-shrink: 0;
+  width: 100%;
+  padding: 11px;
+  background: var(--brand);
+  color: #fff;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  transition: background 0.15s, transform 0.1s;
+}
+.copy-single-btn:hover:not(:disabled) { background: var(--brand-dark); transform: translateY(-1px); }
+.copy-single-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.copy-single-btn--done { background: #10b981 !important; }
 
 /* ══════════════════════════════════════════
    Responsive — 768px

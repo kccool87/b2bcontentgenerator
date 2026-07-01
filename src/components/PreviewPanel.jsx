@@ -40,13 +40,17 @@ function displayUrl(url) {
   }
 }
 
-// ── 포맷 함수 ──────────────────────────────────────────────────
-function buildPreviewTitleUrlBlock(items) {
-  return items.map((c, i) => `${num(i)} ${ct(c.title)}\n${displayUrl(c.url)}`).join('\n\n');
+// ── URL 링크 헬퍼 ───────────────────────────────────────────────
+function UrlLink({ item }) {
+  return (
+    <a href={cleanUrl(item.url)} target="_blank" rel="noopener noreferrer" className="preview-link">
+      {displayUrl(item.url)}
+    </a>
+  );
 }
 
-// 미리보기 JSX 렌더링 — 인사말 + AI문구 + URL 하이퍼링크
-function PreviewContent({ greeting, intro, items }) {
+// ── 탭별 미리보기 JSX ────────────────────────────────────────────
+function EmailPreview({ greeting, intro, items }) {
   return (
     <>
       {greeting}{'\n\n'}
@@ -55,42 +59,61 @@ function PreviewContent({ greeting, intro, items }) {
         <span key={c.id}>
           {i > 0 && '\n\n'}
           {num(i)} {ct(c.title)}{'\n'}
-          <a
-            href={cleanUrl(c.url)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="preview-link"
-          >
-            {displayUrl(c.url)}
-          </a>
+          {'- '}{c.summary}{'\n'}
+          <UrlLink item={c} />
+        </span>
+      ))}
+      {'\n\n필요하시면 관련 상품 상담도 함께 도와드리겠습니다.'}
+    </>
+  );
+}
+
+function MessengerPreview({ greeting, intro, items }) {
+  return (
+    <>
+      {greeting}{'\n\n'}
+      {intro && <>{intro}{'\n\n'}</>}
+      {items.map((c, i) => (
+        <span key={c.id}>
+          {i > 0 && '\n\n'}
+          {num(i)} {ct(c.title)}{'\n'}
+          {'🔗 '}<UrlLink item={c} />
         </span>
       ))}
     </>
   );
 }
 
-function buildTitleUrlBlock(items) {
-  return items.map((c, i) => `${num(i)} ${ct(c.title)}\n${cleanUrl(c.url)}`).join('\n\n');
+function UrlPreview({ items }) {
+  return (
+    <>
+      {items.map((c, i) => (
+        <span key={c.id}>
+          {i > 0 && '\n\n'}
+          {num(i)} {ct(c.title)}{'\n'}
+          <UrlLink item={c} />
+        </span>
+      ))}
+    </>
+  );
 }
 
-function buildFullCopy(items, intro) {
-  const body = items
-    .map((c, i) => `${num(i)} ${ct(c.title)}\n- ${c.summary}\n${cleanUrl(c.url)}`)
-    .join('\n\n');
-  return intro ? `${intro}\n\n${body}` : body;
-}
-
-function buildEmailCopy(items, intro) {
+// ── 복사용 plain text 빌더 ───────────────────────────────────────
+function buildEmailCopy(items, fullIntro) {
   const body = items
     .map((c, i) => `${num(i)} ${ct(c.title)}\n- ${c.summary}\n${cleanUrl(c.url)}`)
     .join('\n\n');
   const footer = '\n\n필요하시면 관련 상품 상담도 함께 도와드리겠습니다.';
-  return intro ? `${intro}\n\n${body}${footer}` : `${body}${footer}`;
+  return `${fullIntro}\n\n${body}${footer}`;
 }
 
-function buildKakaoCopy(items, intro) {
+function buildMessengerCopy(items, fullIntro) {
   const body = items.map((c, i) => `${num(i)} ${ct(c.title)}\n🔗 ${cleanUrl(c.url)}`).join('\n\n');
-  return intro ? `${intro}\n\n${body}` : body;
+  return `${fullIntro}\n\n${body}`;
+}
+
+function buildUrlCopy(items) {
+  return items.map((c, i) => `${num(i)} ${ct(c.title)}\n${cleanUrl(c.url)}`).join('\n\n');
 }
 
 async function writeClipboard(text) {
@@ -130,6 +153,13 @@ function SnsBar() {
   );
 }
 
+// ── 탭 정의 ─────────────────────────────────────────────────────
+const FORMAT_TABS = [
+  { key: 'email',     label: '이메일용 문구' },
+  { key: 'messenger', label: '메신저용 문구' },
+  { key: 'url',       label: '제목+URL 문구' },
+];
+
 // ── 컴포넌트 ──────────────────────────────────────────────────────
 export default function PreviewPanel({
   selectedContents,
@@ -139,9 +169,10 @@ export default function PreviewPanel({
   onReset,
   isLoading,
 }) {
-  const [copiedKey, setCopiedKey] = useState(null);
-  const [phaseIdx, setPhaseIdx] = useState(0);
-  const [greeting, setGreeting] = useState(pickGreeting);
+  const [activeTab, setActiveTab] = useState('email');
+  const [copied, setCopied]       = useState(false);
+  const [phaseIdx, setPhaseIdx]   = useState(0);
+  const [greeting, setGreeting]   = useState(pickGreeting);
 
   useEffect(() => {
     if (!isLoading) { setPhaseIdx(0); return; }
@@ -149,16 +180,9 @@ export default function PreviewPanel({
     return () => clearInterval(id);
   }, [isLoading]);
 
-  // 선택 콘텐츠 수가 바뀔 때마다 인사말 랜덤 교체
   useEffect(() => {
     if (selectedContents.length > 0) setGreeting(pickGreeting());
   }, [selectedContents.length]);
-
-  async function handleCopy(key, text) {
-    await writeClipboard(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2000);
-  }
 
   if (!selectedContents || selectedContents.length === 0) {
     return (
@@ -172,39 +196,21 @@ export default function PreviewPanel({
     );
   }
 
-  // 소개 문구: 인사말 + AI 생성 문구 조합
   const intro     = geminiMessage ?? '';
   const fullIntro = intro ? `${greeting}\n\n${intro}` : greeting;
 
-  const titleBlock  = buildPreviewTitleUrlBlock(selectedContents);
-  const previewText = `${fullIntro}\n\n${titleBlock}`;
+  // 탭별 복사 텍스트
+  function getCopyText() {
+    if (activeTab === 'email')     return buildEmailCopy(selectedContents, fullIntro);
+    if (activeTab === 'messenger') return buildMessengerCopy(selectedContents, fullIntro);
+    return buildUrlCopy(selectedContents);
+  }
 
-  const COPY_BUTTONS = [
-    {
-      key:     'full',
-      label:   '전체 복사',
-      cls:     'copy-btn--full',
-      getText: () => buildFullCopy(selectedContents, fullIntro),
-    },
-    {
-      key:     'url',
-      label:   '제목+URL 복사',
-      cls:     'copy-btn--url',
-      getText: () => buildTitleUrlBlock(selectedContents),
-    },
-    {
-      key:     'email',
-      label:   '이메일용 복사',
-      cls:     'copy-btn--email',
-      getText: () => buildEmailCopy(selectedContents, fullIntro),
-    },
-    {
-      key:     'kakao',
-      label:   '메신저/문자용 복사',
-      cls:     'copy-btn--kakao',
-      getText: () => buildKakaoCopy(selectedContents, fullIntro),
-    },
-  ];
+  async function handleCopy() {
+    await writeClipboard(getCopyText());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div className="preview-panel">
@@ -227,13 +233,7 @@ export default function PreviewPanel({
           <div key={item.id} className="selected-item">
             <span className="selected-dot" />
             <span className="selected-title">{ct(item.title)}</span>
-            <button
-              className="selected-remove"
-              onClick={() => onRemove(item.id)}
-              title="선택 해제"
-            >
-              ×
-            </button>
+            <button className="selected-remove" onClick={() => onRemove(item.id)} title="선택 해제">×</button>
           </div>
         ))}
       </div>
@@ -246,6 +246,19 @@ export default function PreviewPanel({
         </button>
       </div>
 
+      {/* 포맷 탭 */}
+      <div className="format-tab-bar">
+        {FORMAT_TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            className={`format-tab${activeTab === key ? ' format-tab--active' : ''}`}
+            onClick={() => setActiveTab(key)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* 미리보기 영역 */}
       <div className="preview-box">
         {isLoading ? (
@@ -255,24 +268,21 @@ export default function PreviewPanel({
           </div>
         ) : (
           <pre className="preview-text">
-            <PreviewContent greeting={greeting} intro={intro} items={selectedContents} />
+            {activeTab === 'email'     && <EmailPreview     greeting={greeting} intro={intro} items={selectedContents} />}
+            {activeTab === 'messenger' && <MessengerPreview greeting={greeting} intro={intro} items={selectedContents} />}
+            {activeTab === 'url'       && <UrlPreview       items={selectedContents} />}
           </pre>
         )}
       </div>
 
-      {/* 복사 버튼 2×2 */}
-      <div className="copy-btns">
-        {COPY_BUTTONS.map(({ key, label, cls, getText }) => (
-          <button
-            key={key}
-            className={`copy-btn ${cls} ${copiedKey === key ? 'copy-btn--done' : ''}`}
-            onClick={() => handleCopy(key, getText())}
-            disabled={isLoading}
-          >
-            {copiedKey === key ? '복사 완료!' : label}
-          </button>
-        ))}
-      </div>
+      {/* 복사 버튼 */}
+      <button
+        className={`copy-single-btn${copied ? ' copy-single-btn--done' : ''}`}
+        onClick={handleCopy}
+        disabled={isLoading}
+      >
+        {copied ? '✓ 복사 완료!' : '문구 복사하기'}
+      </button>
 
       <SnsBar />
     </div>
