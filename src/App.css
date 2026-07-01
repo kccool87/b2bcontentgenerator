@@ -962,14 +962,10 @@ ol, ul { list-style: none; }
   align-items: stretch;
 }
 
-/* AI 문구 다시 생성 버튼 — 보라 배경 + 스피닝 마젠타 테두리 */
-@property --ai-border-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-@keyframes ai-border-spin {
-  to { --ai-border-angle: 360deg; }
+/* AI 문구 다시 생성 버튼 — 대각선 glassy */
+@keyframes ai-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
 }
 
 .ai-regen-btn {
@@ -981,38 +977,43 @@ ol, ul { list-style: none; }
   padding: 9px 16px;
   background:
     linear-gradient(135deg,
-      rgba(255,255,255,0.22) 0%,
-      rgba(200,170,255,0.18) 40%,
-      rgba(168,130,255,0.14) 100%
+      rgba(255,255,255,0.30) 0%,
+      rgba(230,210,255,0.20) 45%,
+      rgba(200,165,255,0.14) 100%
     ) padding-box,
-    conic-gradient(from var(--ai-border-angle), #d946ef, #f0abfc, #d946ef 45%, #c4a8ff 70%, #d946ef) border-box;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+    linear-gradient(135deg, #e879f9 0%, #f0abfc 28%, #c4b5fd 52%, #a78bfa 74%, #d946ef 100%) border-box;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: var(--brand-dark);
   border: 2px solid transparent;
   border-radius: var(--r-xl);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
-  transition: transform 0.12s, filter 0.15s;
-  box-shadow: 0 2px 10px rgba(180,130,255,0.18), inset 0 1px 0 rgba(255,255,255,0.55);
-  animation: ai-border-spin 2.5s linear infinite;
+  transition: transform 0.12s, box-shadow 0.15s, filter 0.15s;
+  box-shadow:
+    0 2px 10px rgba(180,130,255,0.16),
+    inset 0 1px 0 rgba(255,255,255,0.60),
+    inset 0 -1px 0 rgba(180,130,255,0.10);
   letter-spacing: 0.1px;
 }
 .ai-regen-btn:hover:not(:disabled) {
-  filter: brightness(1.05);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(180,130,255,0.28), inset 0 1px 0 rgba(255,255,255,0.6);
+  box-shadow:
+    0 5px 16px rgba(180,130,255,0.26),
+    inset 0 1px 0 rgba(255,255,255,0.70),
+    inset 0 -1px 0 rgba(180,130,255,0.12);
+  filter: brightness(1.04);
 }
 .ai-regen-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.97); }
 .ai-regen-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   transform: none;
-  animation: none;
   background: var(--bg-muted) padding-box, var(--border) border-box;
   box-shadow: none;
   color: var(--text-4);
+  backdrop-filter: none;
 }
 
 .ai-regen-icon {
