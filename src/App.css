@@ -517,23 +517,23 @@ ol, ul { list-style: none; }
 
 /* ── 선택 상태 ── */
 .content-card--selected {
-  background: linear-gradient(155deg, #fce7f9 0%, #fdf4ff 60%, #fff 100%);
-  border: 1.5px solid #d946ef;
-  box-shadow: 0 8px 26px rgba(217,70,239,0.18), 0 2px 8px rgba(217,70,239,0.1);
+  background: linear-gradient(155deg, #ede8ff 0%, #f5f0ff 55%, #fff 100%);
+  border: 1.5px solid var(--brand);
+  box-shadow: 0 8px 26px rgba(132,79,249,0.2), 0 2px 8px rgba(132,79,249,0.1);
   transform: translateY(-4px);
 }
 .content-card--selected::before {
-  background: linear-gradient(90deg, #a21caf 0%, #e879f9 100%);
+  background: transparent;
 }
 .content-card--selected:hover {
-  box-shadow: 0 12px 32px rgba(217,70,239,0.26), 0 3px 10px rgba(217,70,239,0.14);
+  box-shadow: 0 12px 32px rgba(132,79,249,0.28), 0 3px 10px rgba(132,79,249,0.14);
   transform: translateY(-5px);
 }
 .content-card--selected .card-title {
-  color: #86198f;
+  color: var(--brand-dark);
 }
 .content-card--selected .card-summary {
-  color: #6b1373;
+  color: #4c2d99;
 }
 
 .card-header { display: flex; align-items: center; gap: 5px; margin-bottom: 9px; }
@@ -573,13 +573,13 @@ ol, ul { list-style: none; }
   background: var(--brand-light);
 }
 .card-check--on {
-  background: #d946ef;
-  border-color: #d946ef;
+  background: var(--brand);
+  border-color: var(--brand);
   color: #fff;
   width: 26px;
   height: 26px;
   font-size: 13px;
-  box-shadow: 0 3px 10px rgba(217,70,239,0.5);
+  box-shadow: 0 3px 10px rgba(132,79,249,0.5);
   animation: check-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @keyframes check-pop {
@@ -721,6 +721,13 @@ ol, ul { list-style: none; }
 .preview-reset-btn:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
 
 /* 선택 콘텐츠 칩 */
+.selected-chips-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-4);
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+}
 .selected-chips-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -734,8 +741,10 @@ ol, ul { list-style: none; }
   background: var(--brand-light);
   border: 1px solid rgba(132,79,249,0.22);
   border-radius: var(--r-xl);
-  padding: 3px 6px 3px 7px;
-  max-width: 100%;
+  padding: 4px 7px 4px 8px;
+  width: calc(50% - 3px);
+  min-width: 0;
+  cursor: default;
 }
 .chip-num {
   font-size: 10px;
@@ -749,21 +758,23 @@ ol, ul { list-style: none; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
+  flex: 1;
+  min-width: 0;
 }
 .chip-remove {
   flex-shrink: 0;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   color: var(--text-4);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color 0.12s, background 0.12s;
-  margin-left: 1px;
+  margin-left: 2px;
+  cursor: pointer;
 }
 .chip-remove:hover { color: #dc2626; background: #fee2e2; }
 
@@ -951,32 +962,49 @@ ol, ul { list-style: none; }
   align-items: stretch;
 }
 
-/* AI 문구 다시 생성 버튼 — 마젠타 pill */
+/* AI 문구 다시 생성 버튼 — 보라 배경 + 스피닝 마젠타 테두리 */
+@property --ai-border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes ai-border-spin {
+  to { --ai-border-angle: 360deg; }
+}
+
 .ai-regen-btn {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 10px 18px;
-  background: linear-gradient(135deg, #a21caf 0%, #d946ef 60%, #e879f9 100%);
+  padding: 9px 16px;
+  background:
+    linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%) padding-box,
+    conic-gradient(from var(--ai-border-angle), #d946ef, #f0abfc, #d946ef 45%, var(--brand) 70%, #d946ef) border-box;
   color: #fff;
-  border: none;
+  border: 2px solid transparent;
   border-radius: var(--r-xl);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
-  transition: box-shadow 0.18s, transform 0.12s, filter 0.15s;
-  box-shadow: 0 3px 14px rgba(217,70,239,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.12s, filter 0.15s;
+  box-shadow: none;
+  animation: ai-border-spin 2.5s linear infinite;
   letter-spacing: 0.1px;
 }
 .ai-regen-btn:hover:not(:disabled) {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 5px 20px rgba(217,70,239,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 .ai-regen-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.95); }
-.ai-regen-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.ai-regen-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  animation: none;
+  background: var(--text-4) padding-box, var(--border) border-box;
+}
 
 .ai-regen-icon {
   font-size: 12px;

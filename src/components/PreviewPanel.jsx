@@ -246,9 +246,10 @@ export default function PreviewPanel({
       </div>
 
       {/* 선택된 콘텐츠 — 칩 형태 */}
+      <p className="selected-chips-label">선택된 콘텐츠 ({selectedContents.length}개)</p>
       <div className="selected-chips-wrap">
         {selectedContents.map((item, i) => (
-          <span key={item.id} className="selected-chip">
+          <span key={item.id} className="selected-chip" title={ct(item.title)}>
             <span className="chip-num">{num(i)}</span>
             <span className="chip-title">{ct(item.title)}</span>
             <button className="chip-remove" onClick={() => onRemove(item.id)} title="선택 해제">×</button>
