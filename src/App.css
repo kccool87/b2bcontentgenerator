@@ -406,10 +406,11 @@ ol, ul { list-style: none; }
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
   scrollbar-width: thin;
   scrollbar-color: rgba(132,79,249,0.3) transparent;
-  padding-top: 4px;
+  padding: 18px 6px 4px;
+  margin-top: -18px;
 }
 
 /* ══════════════════════════════════════════
@@ -419,6 +420,8 @@ ol, ul { list-style: none; }
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--card-gap);
+  padding: 6px 6px 2px;
+  margin: -6px -6px -2px;
 }
 
 .card-skeleton {
@@ -484,35 +487,54 @@ ol, ul { list-style: none; }
    Content Card
    ══════════════════════════════════════════ */
 .content-card {
+  position: relative;
   background: var(--bg-card);
   border-radius: var(--r-lg);
   padding: 14px 16px 14px 14px;
   border: 1.5px solid var(--border);
   border-left: 3px solid transparent;
   cursor: pointer;
-  transition: border-color 0.18s, box-shadow 0.18s, transform 0.15s, border-left-color 0.18s;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.18s, background 0.2s;
   box-shadow: var(--shadow-xs);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+.content-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: transparent;
+  transition: background 0.2s;
+  pointer-events: none;
 }
 .content-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
   border-color: #ccc9bf;
 }
+
+/* ── 선택 상태 ── */
 .content-card--selected {
-  border-color: rgba(132,79,249,0.55);
-  border-left-color: var(--brand);
-  background: #f0ebff;
-  box-shadow: 0 0 0 3px rgba(132,79,249,0.22);
+  background: linear-gradient(155deg, #d8c3ff 0%, #ebe0ff 45%, #f8f4ff 100%);
+  border: 2px solid var(--brand);
+  border-left-width: 4px;
+  box-shadow: 0 10px 32px rgba(132,79,249,0.28), 0 3px 10px rgba(132,79,249,0.14);
+  transform: translateY(-4px);
+}
+.content-card--selected::before {
+  background: linear-gradient(90deg, #6b30f0 0%, #c084fc 100%);
 }
 .content-card--selected:hover {
-  border-color: rgba(132,79,249,0.7);
-  border-left-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(132,79,249,0.28), var(--shadow-sm);
+  box-shadow: 0 14px 38px rgba(132,79,249,0.34), 0 4px 12px rgba(132,79,249,0.18);
+  transform: translateY(-5px);
 }
 .content-card--selected .card-title {
-  color: var(--brand-dark);
+  color: #3d1480;
+}
+.content-card--selected .card-summary {
+  color: #5a3d8a;
 }
 
 .card-header { display: flex; align-items: center; gap: 5px; margin-bottom: 9px; }
@@ -555,10 +577,16 @@ ol, ul { list-style: none; }
   background: var(--brand);
   border-color: var(--brand);
   color: #fff;
-  width: 24px;
-  height: 24px;
-  font-size: 12px;
-  box-shadow: 0 2px 8px rgba(132,79,249,0.45);
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+  box-shadow: 0 3px 10px rgba(132,79,249,0.5);
+  animation: check-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes check-pop {
+  0%   { transform: scale(0.4) rotate(-10deg); opacity: 0.5; }
+  70%  { transform: scale(1.15) rotate(4deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 .card-title {
