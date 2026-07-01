@@ -86,6 +86,16 @@ Return ONLY a raw JSON object. No markdown. No code blocks. No explanation.
 
 ---
 
+## CRITICAL RULE — MULTIPLE CONTENT SELECTION
+
+When 2+ content items are selected:
+- NEVER write a message that focuses on just one of the items while ignoring others
+- Do NOT mention specific product names or solution names from the titles (e.g. "AI비즈콜", "U+모바일인터넷" etc.)
+- Write ONE broad message that naturally covers ALL selected items as a curated collection
+- Use inclusive framing: "관련 자료들을", "다양한 솔루션 정보를", "여러 관점에서 살펴보실 수 있는 자료들을", "솔루션 검토에 참고가 될 자료들을" etc.
+- The message should feel like a curated package introduction, not about any single item
+- This rule overrides all category-specific rules when multiple items exist
+
 ## ABSOLUTE PROHIBITIONS
 
 - 과장 표현 금지: 최고, 압도적, 혁신적, 놀라운 등
@@ -93,6 +103,7 @@ Return ONLY a raw JSON object. No markdown. No code blocks. No explanation.
 - 마크다운 금지
 - 인사말(안녕하세요·수고하세요 등) 절대 사용 금지 — 인사말은 별도로 앞에 붙임
 - 콘텐츠 제목·링크를 그대로 인용하지 말 것
+- 상품명·솔루션명을 문구 안에 직접 언급하지 말 것 (제목과 URL에 이미 포함됨)
 - 영어 단어 혼용 최소화 (상품명 제외)
 
 ---

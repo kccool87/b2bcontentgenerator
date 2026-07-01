@@ -517,24 +517,23 @@ ol, ul { list-style: none; }
 
 /* ── 선택 상태 ── */
 .content-card--selected {
-  background: linear-gradient(155deg, #d8c3ff 0%, #ebe0ff 45%, #f8f4ff 100%);
-  border: 2px solid var(--brand);
-  border-left-width: 4px;
-  box-shadow: 0 10px 32px rgba(132,79,249,0.28), 0 3px 10px rgba(132,79,249,0.14);
+  background: linear-gradient(155deg, #fce7f9 0%, #fdf4ff 60%, #fff 100%);
+  border: 1.5px solid #d946ef;
+  box-shadow: 0 8px 26px rgba(217,70,239,0.18), 0 2px 8px rgba(217,70,239,0.1);
   transform: translateY(-4px);
 }
 .content-card--selected::before {
-  background: linear-gradient(90deg, #6b30f0 0%, #c084fc 100%);
+  background: linear-gradient(90deg, #a21caf 0%, #e879f9 100%);
 }
 .content-card--selected:hover {
-  box-shadow: 0 14px 38px rgba(132,79,249,0.34), 0 4px 12px rgba(132,79,249,0.18);
+  box-shadow: 0 12px 32px rgba(217,70,239,0.26), 0 3px 10px rgba(217,70,239,0.14);
   transform: translateY(-5px);
 }
 .content-card--selected .card-title {
-  color: #3d1480;
+  color: #86198f;
 }
 .content-card--selected .card-summary {
-  color: #5a3d8a;
+  color: #6b1373;
 }
 
 .card-header { display: flex; align-items: center; gap: 5px; margin-bottom: 9px; }
@@ -574,13 +573,13 @@ ol, ul { list-style: none; }
   background: var(--brand-light);
 }
 .card-check--on {
-  background: var(--brand);
-  border-color: var(--brand);
+  background: #d946ef;
+  border-color: #d946ef;
   color: #fff;
   width: 26px;
   height: 26px;
   font-size: 13px;
-  box-shadow: 0 3px 10px rgba(132,79,249,0.5);
+  box-shadow: 0 3px 10px rgba(217,70,239,0.5);
   animation: check-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @keyframes check-pop {
@@ -952,30 +951,31 @@ ol, ul { list-style: none; }
   align-items: stretch;
 }
 
-/* AI 문구 다시 생성 버튼 */
+/* AI 문구 다시 생성 버튼 — 마젠타 pill */
 .ai-regen-btn {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 10px 16px;
-  background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 60%, #9333ea 100%);
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #a21caf 0%, #d946ef 60%, #e879f9 100%);
   color: #fff;
   border: none;
-  border-radius: var(--r-md);
+  border-radius: var(--r-xl);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
   transition: box-shadow 0.18s, transform 0.12s, filter 0.15s;
-  box-shadow: 0 3px 14px rgba(124,58,237,0.5), inset 0 1px 0 rgba(255,255,255,0.18);
+  box-shadow: 0 3px 14px rgba(217,70,239,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  letter-spacing: 0.1px;
 }
 .ai-regen-btn:hover:not(:disabled) {
-  filter: brightness(1.12);
+  filter: brightness(1.1);
   transform: translateY(-1px);
-  box-shadow: 0 5px 20px rgba(124,58,237,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow: 0 5px 20px rgba(217,70,239,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
 }
-.ai-regen-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.96); }
+.ai-regen-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.95); }
 .ai-regen-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
 .ai-regen-icon {
