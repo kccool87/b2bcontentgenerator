@@ -737,6 +737,15 @@ ol, ul { list-style: none; }
   scrollbar-color: var(--brand) transparent;
 }
 
+/* 미리보기 URL 하이퍼링크 */
+.preview-link {
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+.preview-link:hover { opacity: 0.75; }
+
 /* SNS 채널 섹션 (preview-panel 내부 하단) */
 .sns-section {
   flex-shrink: 0;

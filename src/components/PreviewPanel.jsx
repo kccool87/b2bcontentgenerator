@@ -33,6 +33,29 @@ function buildPreviewTitleUrlBlock(items) {
   return items.map((c, i) => `${num(i)} ${ct(c.title)}\n${displayUrl(c.url)}`).join('\n\n');
 }
 
+// 미리보기 JSX 렌더링 — URL을 실제 하이퍼링크로 표시
+function PreviewContent({ intro, items }) {
+  return (
+    <>
+      {intro && <>{intro}{'\n\n'}</>}
+      {items.map((c, i) => (
+        <span key={c.id}>
+          {i > 0 && '\n\n'}
+          {num(i)} {ct(c.title)}{'\n'}
+          <a
+            href={cleanUrl(c.url)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="preview-link"
+          >
+            {displayUrl(c.url)}
+          </a>
+        </span>
+      ))}
+    </>
+  );
+}
+
 function buildTitleUrlBlock(items) {
   return items.map((c, i) => `${num(i)} ${ct(c.title)}\n${cleanUrl(c.url)}`).join('\n\n');
 }
@@ -210,7 +233,9 @@ export default function PreviewPanel({
             <span className="loading-text">{LOADING_PHASES[phaseIdx]}</span>
           </div>
         ) : (
-          <pre className="preview-text">{previewText}</pre>
+          <pre className="preview-text">
+            <PreviewContent intro={intro} items={selectedContents} />
+          </pre>
         )}
       </div>
 
