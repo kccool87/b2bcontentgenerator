@@ -132,7 +132,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
           className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
           onClick={() => { onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); }}
         >
-          전체보기 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
+          전체 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
         </button>
 
         {FILTER_TYPES.map((type) => {

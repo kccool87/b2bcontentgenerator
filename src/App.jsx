@@ -88,6 +88,11 @@ export default function App() {
     resetGemini();
   }
 
+  function handleDeselect() {
+    setSelectedIds(new Set());
+    resetGemini();
+  }
+
   // 수동으로 "소개 문구 자동 생성" 버튼 클릭 시 재생성
   async function handleGenerateAI() {
     if (selectedContents.length === 0) return;
@@ -150,6 +155,7 @@ export default function App() {
               onGenerateAI={handleGenerateAI}
               onRemove={handleRemove}
               onReset={handleReset}
+              onDeselect={handleDeselect}
               isLoading={isLoading}
             />
           </aside>

@@ -180,6 +180,7 @@ export default function PreviewPanel({
   onGenerateAI,
   onRemove,
   onReset,
+  onDeselect,
   isLoading,
 }) {
   const [activeTab, setActiveTab]           = useState('email');
@@ -239,20 +240,19 @@ export default function PreviewPanel({
           </svg>
           고객 제안 문구 미리보기
         </h2>
-        <button className="preview-reset-btn" onClick={onReset} title="전체 초기화">
-          ↺ 초기화
+        <button className="preview-reset-btn" onClick={onDeselect} title="선택된 콘텐츠 모두 해제">
+          선택해제
         </button>
       </div>
 
-      {/* 선택된 콘텐츠 목록 */}
-      <div className="selected-list">
-        <p className="selected-label">선택된 콘텐츠 ({selectedContents.length}개)</p>
-        {selectedContents.map((item) => (
-          <div key={item.id} className="selected-item">
-            <span className="selected-dot" />
-            <span className="selected-title">{ct(item.title)}</span>
-            <button className="selected-remove" onClick={() => onRemove(item.id)} title="선택 해제">×</button>
-          </div>
+      {/* 선택된 콘텐츠 — 칩 형태 */}
+      <div className="selected-chips-wrap">
+        {selectedContents.map((item, i) => (
+          <span key={item.id} className="selected-chip">
+            <span className="chip-num">{num(i)}</span>
+            <span className="chip-title">{ct(item.title)}</span>
+            <button className="chip-remove" onClick={() => onRemove(item.id)} title="선택 해제">×</button>
+          </span>
         ))}
       </div>
 
