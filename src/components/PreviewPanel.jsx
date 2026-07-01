@@ -155,9 +155,9 @@ function SnsBar() {
 
 // ── 탭 정의 ─────────────────────────────────────────────────────
 const FORMAT_TABS = [
-  { key: 'email',     label: '이메일용 문구' },
-  { key: 'messenger', label: '메신저용 문구' },
-  { key: 'url',       label: '제목+URL 문구' },
+  { key: 'email',     icon: '✉',  label: '이메일용' },
+  { key: 'messenger', icon: '💬', label: '메신저용' },
+  { key: 'url',       icon: '🔗', label: '제목+URL' },
 ];
 
 // ── 컴포넌트 ──────────────────────────────────────────────────────
@@ -240,13 +240,14 @@ export default function PreviewPanel({
 
       {/* 포맷 탭 */}
       <div className="format-tab-bar">
-        {FORMAT_TABS.map(({ key, label }) => (
+        {FORMAT_TABS.map(({ key, icon, label }) => (
           <button
             key={key}
             className={`format-tab${activeTab === key ? ' format-tab--active' : ''}`}
             onClick={() => setActiveTab(key)}
           >
-            {label}
+            <span className="format-tab-icon">{icon}</span>
+            <span className="format-tab-label">{label}</span>
           </button>
         ))}
       </div>
