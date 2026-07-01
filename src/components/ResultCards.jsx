@@ -223,7 +223,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
                 return (
                   <div
                     key={item.id}
-                    className={`content-card${selected ? ' content-card--selected' : ''}`}
+                    className={`content-card content-card--type-${item.type.toLowerCase().replace('_', '-')}${selected ? ' content-card--selected' : ''}`}
                     onClick={() => onToggle(item.id)}
                     role="button"
                     aria-pressed={selected}
