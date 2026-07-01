@@ -3,17 +3,26 @@ import { useState, useEffect } from 'react';
 const NUMS = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
 function num(i) { return NUMS[i] ?? String(i + 1); }
 
-const GREETINGS = [
-  '안녕하세요? LG유플러스 OOO 담당자입니다.',
-  '안녕하세요! LG유플러스 기업솔루션팀 OOO입니다.',
-  '안녕하세요. 항상 감사드립니다. LG유플러스 OOO입니다.',
-  '안녕하세요? 고객님, 좋은 하루 되고 계신가요? LG유플러스 OOO 담당입니다.',
-  '안녕하세요! 평소 저희 서비스에 관심 가져주셔서 감사드립니다. LG유플러스 OOO입니다.',
-  '안녕하세요. LG유플러스 기업고객 담당 OOO입니다. 항상 감사드립니다.',
-  '고객님, 안녕하세요? LG유플러스 영업담당 OOO입니다.',
-  '안녕하세요! 오늘도 좋은 하루 되시길 바랍니다. LG유플러스 OOO 담당자입니다.',
+// ── 인사말 풀 (이메일 = 합쇼체·격식 / 메신저 = 해요체·자연스럽게) ──
+const EMAIL_GREETINGS = [
+  '안녕하세요. LG유플러스 기업고객 담당 OOO입니다.',
+  '안녕하세요. LG유플러스 기업솔루션팀 OOO입니다.',
+  '항상 관심 가져주셔서 감사드립니다. LG유플러스 영업담당 OOO입니다.',
+  '안녕하세요. 평소 변함없는 성원에 감사드립니다. LG유플러스 OOO입니다.',
+  '안녕하세요. 항상 감사드립니다. LG유플러스 기업고객 담당 OOO입니다.',
+  '안녕하세요. 저는 LG유플러스에서 기업 솔루션을 담당하고 있는 OOO입니다.',
 ];
-function pickGreeting() { return GREETINGS[Math.floor(Math.random() * GREETINGS.length)]; }
+
+const MESSENGER_GREETINGS = [
+  '안녕하세요? LG유플러스 OOO 담당자입니다.',
+  '안녕하세요! LG유플러스 OOO입니다.',
+  '안녕하세요? 잘 지내고 계신가요? LG유플러스 OOO입니다.',
+  '안녕하세요! 오늘도 좋은 하루 되세요. LG유플러스 OOO입니다.',
+  '안녕하세요? 고객님, LG유플러스 OOO 담당입니다.',
+  '안녕하세요! LG유플러스 OOO 담당자입니다, 연락드려요.',
+];
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 const LOADING_PHASES = [
   '콘텐츠 분석 중 ·',
@@ -50,6 +59,8 @@ function UrlLink({ item }) {
 }
 
 // ── 탭별 미리보기 JSX ────────────────────────────────────────────
+
+// 이메일: 합쇼체 인사 + 격식 도입문 + 제목·요약·URL + 맺음말
 function EmailPreview({ greeting, intro, items }) {
   return (
     <>
@@ -63,11 +74,12 @@ function EmailPreview({ greeting, intro, items }) {
           <UrlLink item={c} />
         </span>
       ))}
-      {'\n\n필요하시면 관련 상품 상담도 함께 도와드리겠습니다.'}
+      {'\n\n검토하시다가 궁금하신 점 있으시면 언제든지 말씀해 주시기 바랍니다.'}
     </>
   );
 }
 
+// 메신저: 해요체 인사 + 가벼운 도입문 + 제목·URL만 (요약 없음)
 function MessengerPreview({ greeting, intro, items }) {
   return (
     <>
@@ -75,7 +87,7 @@ function MessengerPreview({ greeting, intro, items }) {
       {intro && <>{intro}{'\n\n'}</>}
       {items.map((c, i) => (
         <span key={c.id}>
-          {i > 0 && '\n\n'}
+          {i > 0 && '\n'}
           {num(i)} {ct(c.title)}{'\n'}
           {'🔗 '}<UrlLink item={c} />
         </span>
@@ -99,17 +111,18 @@ function UrlPreview({ items }) {
 }
 
 // ── 복사용 plain text 빌더 ───────────────────────────────────────
-function buildEmailCopy(items, fullIntro) {
+function buildEmailCopy(items, greeting, intro) {
+  const head = intro ? `${greeting}\n\n${intro}` : greeting;
   const body = items
     .map((c, i) => `${num(i)} ${ct(c.title)}\n- ${c.summary}\n${cleanUrl(c.url)}`)
     .join('\n\n');
-  const footer = '\n\n필요하시면 관련 상품 상담도 함께 도와드리겠습니다.';
-  return `${fullIntro}\n\n${body}${footer}`;
+  return `${head}\n\n${body}\n\n검토하시다가 궁금하신 점 있으시면 언제든지 말씀해 주시기 바랍니다.`;
 }
 
-function buildMessengerCopy(items, fullIntro) {
-  const body = items.map((c, i) => `${num(i)} ${ct(c.title)}\n🔗 ${cleanUrl(c.url)}`).join('\n\n');
-  return `${fullIntro}\n\n${body}`;
+function buildMessengerCopy(items, greeting, intro) {
+  const head = intro ? `${greeting}\n\n${intro}` : greeting;
+  const body = items.map((c, i) => `${num(i)} ${ct(c.title)}\n🔗 ${cleanUrl(c.url)}`).join('\n');
+  return `${head}\n\n${body}`;
 }
 
 function buildUrlCopy(items) {
@@ -163,16 +176,17 @@ const FORMAT_TABS = [
 // ── 컴포넌트 ──────────────────────────────────────────────────────
 export default function PreviewPanel({
   selectedContents,
-  geminiMessage,
+  geminiMessage,        // { email: string, messenger: string } | null
   onGenerateAI,
   onRemove,
   onReset,
   isLoading,
 }) {
-  const [activeTab, setActiveTab] = useState('email');
-  const [copied, setCopied]       = useState(false);
-  const [phaseIdx, setPhaseIdx]   = useState(0);
-  const [greeting, setGreeting]   = useState(pickGreeting);
+  const [activeTab, setActiveTab]           = useState('email');
+  const [copied, setCopied]                 = useState(false);
+  const [phaseIdx, setPhaseIdx]             = useState(0);
+  const [emailGreeting, setEmailGreeting]   = useState(() => pick(EMAIL_GREETINGS));
+  const [msgGreeting,   setMsgGreeting]     = useState(() => pick(MESSENGER_GREETINGS));
 
   useEffect(() => {
     if (!isLoading) { setPhaseIdx(0); return; }
@@ -180,8 +194,12 @@ export default function PreviewPanel({
     return () => clearInterval(id);
   }, [isLoading]);
 
+  // 선택 콘텐츠 수가 바뀔 때마다 인사말 재추첨
   useEffect(() => {
-    if (selectedContents.length > 0) setGreeting(pickGreeting());
+    if (selectedContents.length > 0) {
+      setEmailGreeting(pick(EMAIL_GREETINGS));
+      setMsgGreeting(pick(MESSENGER_GREETINGS));
+    }
   }, [selectedContents.length]);
 
   if (!selectedContents || selectedContents.length === 0) {
@@ -196,13 +214,13 @@ export default function PreviewPanel({
     );
   }
 
-  const intro     = geminiMessage ?? '';
-  const fullIntro = intro ? `${greeting}\n\n${intro}` : greeting;
+  // geminiMessage = { email, messenger } 객체
+  const emailIntro     = geminiMessage?.email     ?? '';
+  const messengerIntro = geminiMessage?.messenger ?? '';
 
-  // 탭별 복사 텍스트
   function getCopyText() {
-    if (activeTab === 'email')     return buildEmailCopy(selectedContents, fullIntro);
-    if (activeTab === 'messenger') return buildMessengerCopy(selectedContents, fullIntro);
+    if (activeTab === 'email')     return buildEmailCopy(selectedContents, emailGreeting, emailIntro);
+    if (activeTab === 'messenger') return buildMessengerCopy(selectedContents, msgGreeting, messengerIntro);
     return buildUrlCopy(selectedContents);
   }
 
@@ -261,8 +279,8 @@ export default function PreviewPanel({
           </div>
         ) : (
           <pre className="preview-text">
-            {activeTab === 'email'     && <EmailPreview     greeting={greeting} intro={intro} items={selectedContents} />}
-            {activeTab === 'messenger' && <MessengerPreview greeting={greeting} intro={intro} items={selectedContents} />}
+            {activeTab === 'email'     && <EmailPreview     greeting={emailGreeting} intro={emailIntro}     items={selectedContents} />}
+            {activeTab === 'messenger' && <MessengerPreview greeting={msgGreeting}   intro={messengerIntro} items={selectedContents} />}
             {activeTab === 'url'       && <UrlPreview       items={selectedContents} />}
           </pre>
         )}

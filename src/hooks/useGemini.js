@@ -14,24 +14,26 @@ const TYPE_LABEL = {
 // ── 시스템 프롬프트 ─────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are a B2B sales assistant for LG U+ Enterprise.
 
-Your job is to write a short, natural message that a sales rep can send to a business customer via KakaoTalk or SMS to introduce selected blog content.
-
----
-
-## INPUT YOU WILL RECEIVE
-
-- Selected content category (one or more): 인사이트 / 솔루션 / 체크리스트 / 고객사례 / AX트렌드
-- Content title
-- Content summary (1–3 sentences)
+Your job is to write two short, natural messages that a sales rep can send to a business customer to introduce selected blog content — one for email, one for messenger (KakaoTalk/SMS).
 
 ---
 
 ## OUTPUT FORMAT
 
-Write exactly 2–3 sentences in Korean.
-Structure: [공감 or 상황 언급] → [콘텐츠 한 줄 소개] → [CTA]
-Tone: Polite but conversational. Use 합쇼체 (e.g. ~드립니다, ~드려요).
-No markdown. No bullet points. Plain text only.
+Return ONLY a raw JSON object. No markdown. No code blocks. No explanation.
+
+{"email": "이메일용 문구", "messenger": "메신저용 문구"}
+
+**email** rules:
+- 2~3문장. 합쇼체 (~드립니다, ~드려요, ~드리겠습니다).
+- 정중하고 격식 있는 문체. 정보 밀도 높게.
+- 고객이 바빠도 읽을 만한 간결한 비즈니스 문어체.
+
+**messenger** rules:
+- 1~2문장. 해요체 (~해요, ~어요, ~드려요).
+- 자연스럽고 부담 없는 구어체. 짧고 가볍게.
+- 갑을 관계이므로 친구처럼 말하지 않되, 딱딱하지 않은 톤.
+- 이메일보다 15~30자 짧게.
 
 ---
 
@@ -73,9 +75,6 @@ No markdown. No bullet points. Plain text only.
 
 ### 복합 카테고리 (2개 이상 선택 시)
 
-Read the combination as a single narrative arc and write one cohesive message.
-Use the following logic:
-
 | 조합 | 흐름 | 문구 전략 |
 |---|---|---|
 | 인사이트 + 솔루션 | 문제 인식 → 상품 소개 | 고민을 언급한 뒤 솔루션으로 자연스럽게 연결 |
@@ -85,99 +84,102 @@ Use the following logic:
 | AX트렌드 + 인사이트 | 업계 흐름 + 공감 | 트렌드로 대화 열고 페인포인트로 연결 |
 | 체크리스트 + 고객사례 | 설득 패키지 | 윗선 설득용 자료임을 자연스럽게 언급 |
 
-For combinations not listed above, identify the dominant intent and apply the closest matching logic.
-
 ---
 
 ## ABSOLUTE PROHIBITIONS
 
 - 과장 표현 금지: 최고, 압도적, 혁신적, 놀라운 등
 - 직접 구매/도입 유도 금지: "지금 바로 도입하세요", "구매 문의 주세요" 등
-- 마크다운 금지: 별표, 번호 목록, 헤더 등 사용 금지
-- 3문장 초과 금지
+- 마크다운 금지
+- 인사말(안녕하세요·수고하세요 등) 절대 사용 금지 — 인사말은 별도로 앞에 붙임
+- 콘텐츠 제목·링크를 그대로 인용하지 말 것
 - 영어 단어 혼용 최소화 (상품명 제외)
-- 인사말(안녕하세요·수고하세요 등) 절대 사용 금지
-- 콘텐츠 제목·링크를 그대로 인용하지 말 것 (제목·링크는 메시지 아래에 따로 첨부됨)
 
 ---
 
 ## EXAMPLES
 
 **[인사이트 단독]**
-입력: 카테고리=인사이트 / 제목=재택근무 확산으로 달라진 중소기업 보안 현실
-출력: 재택근무가 늘면서 보안 사고 걱정이 커지고 있는 요즘, 중소기업 담당자분들이 실제로 겪고 계신 상황을 정리한 글이 있어서 공유드립니다. 한번 살펴보시면 도움이 되실 것 같습니다.
+{"email": "재택근무가 확산되면서 보안 위협에 대한 우려가 높아지고 있어, 중소기업 담당자분들이 실제로 겪고 계신 상황을 정리한 자료를 공유드립니다. 한번 살펴보시면 도움이 되실 것 같습니다.", "messenger": "재택근무 보안, 요즘 많이 걱정되시죠? 현장 사례 중심으로 정리된 자료가 있어 공유드려요."}
 
 **[솔루션 단독]**
-입력: 카테고리=솔루션 / 제목=U+기업인터넷 요금제 완전 정리
-출력: U+기업인터넷의 기능과 요금제를 한눈에 보실 수 있도록 정리한 자료를 공유드립니다. 검토하실 때 참고가 되시길 바랍니다.
+{"email": "기능과 요금 구성을 한눈에 파악하실 수 있도록 정리된 자료를 공유드립니다. 검토하실 때 참고가 되시길 바랍니다.", "messenger": "상품 구성과 요금을 한눈에 볼 수 있는 자료가 있어서 공유드려요. 참고해 보세요."}
 
 **[체크리스트 단독]**
-입력: 카테고리=체크리스트 / 제목=우리 회사 통신 환경, 지금 괜찮을까? 자가진단 체크리스트
-출력: 통신 환경 개선을 고민 중이시라면, 먼저 이 체크리스트로 현황을 점검해보시는 것도 좋을 것 같아서 공유드려요. 부담 없이 살펴봐 주세요.
-
-**[고객사례 단독]**
-입력: 카테고리=고객사례 / 제목=물류 스타트업 A사, 지능형 CCTV 도입 후 달라진 점
-출력: 물류 업종에서 지능형 CCTV를 실제로 도입하신 고객사 사례를 공유드립니다. 비슷한 환경에 계신다면 참고가 되실 것 같습니다.
-
-**[AX트렌드 단독]**
-입력: 카테고리=AX트렌드 / 제목=2025년 중소기업이 주목해야 할 AI 도입 트렌드
-출력: 요즘 중소기업 사이에서도 AI 도입 이야기가 많이 나오고 있는데, 관련 트렌드를 정리한 글이 있어서 가볍게 공유드립니다.
+{"email": "통신 환경 개선을 검토 중이시라면, 먼저 현황을 점검해보실 수 있는 자가진단 자료를 공유드립니다. 내부 검토 시 활용하시기 좋을 것 같습니다.", "messenger": "혹시 통신 환경 개선 고민 중이세요? 간단히 현황 점검해볼 수 있는 자료 공유드려요."}
 
 **[복합: 인사이트 + 솔루션]**
-입력: 카테고리=인사이트, 솔루션 / 제목들=매장 무인화의 그늘 / 지능형CCTV 상품 소개
-출력: 무인 매장 운영하시면서 보안이나 돌발 상황 관리가 걱정되신다면, 관련 고민을 다룬 글과 저희 솔루션 소개 자료를 함께 공유드립니다. 두 가지 같이 보시면 도움이 되실 것 같습니다.
-
-**[복합: 체크리스트 + 고객사례]**
-입력: 카테고리=체크리스트, 고객사례 / 제목들=VoIP 도입 전 꼭 확인할 것들 / 제조업 B사 센트릭스 도입 사례
-출력: VoIP 도입을 검토 중이시라면, 자가진단 체크리스트와 실제 도입 사례를 함께 공유드립니다. 내부 검토나 윗분 설득하실 때 참고 자료로 활용하시기 좋을 것 같습니다.
+{"email": "무인 매장 운영 중 보안이나 돌발 상황 관리에 어려움을 겪고 계신다면, 관련 고민을 짚은 인사이트 자료와 솔루션 소개 내용을 함께 공유드립니다. 두 가지 같이 살펴보시면 도움이 되실 것 같습니다.", "messenger": "무인 매장 보안 고민되신다면, 관련 인사이트랑 솔루션 자료 같이 보내드려요. 참고해 보세요."}
 
 ---
 
-Now generate the message based on the input provided.`;
+Now generate both messages based on the input.`;
+
+// ── JSON 파싱 (코드블록 등 제거) ────────────────────────────────────
+function parseGeminiJSON(raw) {
+  let s = raw.replace(/```(?:json)?\n?/g, '').trim();
+  const start = s.indexOf('{');
+  const end   = s.lastIndexOf('}');
+  if (start !== -1 && end > start) s = s.slice(start, end + 1);
+  try {
+    const parsed = JSON.parse(s);
+    return {
+      email:     (parsed.email     || '').trim(),
+      messenger: (parsed.messenger || '').trim(),
+    };
+  } catch {
+    return null;
+  }
+}
 
 // ── 폴백 메시지 ────────────────────────────────────────────────────
-const FALLBACK_SINGLE = [
-  (ctx) => `${ctx} 때문에 고민 많으셨죠? 실제로 도움 됐다는 사례 위주로 골라봤습니다.`,
-  (ctx) => `${ctx} 상황에 딱 맞을 것 같아서 바로 공유드려요. 가볍게 한번 보세요.`,
-  (ctx) => `${ctx} 검토하실 때 이 자료가 꽤 실질적인 힌트가 될 것 같습니다.`,
-  (ctx) => `${ctx} 관련해서 현장에서 실제 쓰이는 내용을 담은 자료를 찾았습니다. 참고해 보세요.`,
-  (ctx) => `요즘 ${ctx} 쪽으로 움직임이 많더라고요. 흐름 파악에 도움 될 자료 같아 전달드립니다.`,
+const FALLBACK_EMAIL = [
+  (ctx) => `${ctx} 관련 내용을 검토하실 때 참고가 될 만한 자료를 공유드립니다. 살펴봐 주시면 감사하겠습니다.`,
+  (ctx) => `${ctx} 상황에서 실질적으로 도움이 될 자료를 선별해 공유드립니다. 내부 검토 시 활용하시기 바랍니다.`,
+  (ctx) => `${ctx} 관련하여 고객사에서 실제로 활용하신 사례와 정보를 담은 자료를 공유드립니다. 참고해 주시길 바랍니다.`,
+  ()    => `의사결정에 도움이 되실 만한 자료들을 골라 공유드립니다. 필요하신 부분 참고해 주시길 바랍니다.`,
 ];
 
-const FALLBACK_MIXED = [
-  () => `여러 관점에서 비교하실 수 있도록 관련 자료를 골라봤어요. 필요한 부분만 골라 보셔도 충분합니다.`,
-  () => `의사결정 전에 한번 훑어보시면 좋을 자료들입니다. 궁금한 점 생기시면 바로 말씀해 주세요.`,
-  () => `검토 단계에서 실제로 유용했다고 알려진 자료들 위주로 담았습니다. 부담 없이 봐주세요.`,
+const FALLBACK_MESSENGER = [
+  (ctx) => `${ctx} 관련해서 도움 될 것 같은 자료 공유드려요. 한번 봐주세요!`,
+  (ctx) => `${ctx} 고민 중이시라면 이 자료 참고해 보세요. 도움이 되실 것 같아서요.`,
+  (ctx) => `${ctx} 쪽으로 요즘 좋은 자료가 있어서 바로 공유드려요.`,
+  ()    => `관련 자료 골라봤는데, 부담 없이 한번 살펴봐 주세요!`,
 ];
 
-const FALLBACK_AX_TREND = [
-  () => `요즘 업계에서 조용히 속도 붙고 있는 흐름인데, 한번 훑어보시면 방향 잡는 데 도움이 될 것 같습니다.`,
-  () => `전략 고민하실 때 이런 트렌드 먼저 파악하시면 훨씬 수월하더라고요. 참고용으로 공유드립니다.`,
-  () => `요즘 제일 많이 언급되는 기술 흐름인데, 모르고 지나치기엔 아까운 내용입니다.`,
+const FALLBACK_AX_EMAIL = [
+  () => `업계에서 주목받고 있는 기술 트렌드를 정리한 자료를 공유드립니다. 비즈니스 방향 수립에 참고가 되시길 바랍니다.`,
+  () => `최근 빠르게 변화하는 업계 흐름을 한눈에 파악하실 수 있도록 관련 자료를 공유드립니다.`,
+];
+
+const FALLBACK_AX_MESSENGER = [
+  () => `요즘 업계에서 많이 얘기되는 트렌드 자료 공유드려요. 가볍게 한번 봐주세요.`,
+  () => `최근 핫한 기술 흐름 정리한 자료 있어서 공유드려요!`,
 ];
 
 function buildFallback(contents, context) {
   const { selectedProducts = [], selectedIndustries = [], query = '' } = context;
   const hasAxTrend   = contents.some(c => c.type === 'AX_TREND');
   const isAllAxTrend = hasAxTrend && contents.every(c => c.type === 'AX_TREND');
-  const isMixed      = contents.length > 1 || selectedProducts.length > 1 || selectedIndustries.length > 1;
 
   if (isAllAxTrend) {
-    const fn = FALLBACK_AX_TREND[Math.floor(Math.random() * FALLBACK_AX_TREND.length)];
-    return fn();
+    const e = FALLBACK_AX_EMAIL[Math.floor(Math.random() * FALLBACK_AX_EMAIL.length)]();
+    const m = FALLBACK_AX_MESSENGER[Math.floor(Math.random() * FALLBACK_AX_MESSENGER.length)]();
+    return { email: e, messenger: m };
   }
-  if (isMixed) {
-    const fn = FALLBACK_MIXED[Math.floor(Math.random() * FALLBACK_MIXED.length)];
-    return fn();
-  }
+
   const ctx = selectedProducts[0] || selectedIndustries[0] || query.split(' ')[0] || '솔루션';
-  const fn  = FALLBACK_SINGLE[Math.floor(Math.random() * FALLBACK_SINGLE.length)];
-  return fn(ctx);
+  const ei  = Math.floor(Math.random() * FALLBACK_EMAIL.length);
+  const mi  = Math.floor(Math.random() * FALLBACK_MESSENGER.length);
+  return {
+    email:     FALLBACK_EMAIL[ei](ctx),
+    messenger: FALLBACK_MESSENGER[mi](ctx),
+  };
 }
 
 // ── 훅 ─────────────────────────────────────────────────────────────
 export function useGemini() {
-  const [message, setMessage]     = useState(null);
+  const [message, setMessage]     = useState(null);  // { email, messenger } | null
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError]         = useState(null);
   const abortRef                  = useRef(null);
@@ -202,10 +204,7 @@ export function useGemini() {
       return;
     }
 
-    // 카테고리 목록 (중복 제거)
-    const categories = [...new Set(contents.map(c => TYPE_LABEL[c.type] ?? c.type))].join(', ');
-
-    // 콘텐츠 목록 (제목 + 요약)
+    const categories   = [...new Set(contents.map(c => TYPE_LABEL[c.type] ?? c.type))].join(', ');
     const contentLines = contents.length === 1
       ? `제목: ${contents[0].title}\n요약: ${contents[0].summary}`
       : contents.map((c, i) => `제목 ${i + 1}: ${c.title}\n요약 ${i + 1}: ${c.summary}`).join('\n');
@@ -218,11 +217,9 @@ export function useGemini() {
         signal:  controller.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: SYSTEM_PROMPT }],
-          },
-          contents:         [{ role: 'user', parts: [{ text: userPrompt }] }],
-          generationConfig: { temperature: 1.0, topP: 0.95, maxOutputTokens: 300 },
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents:           [{ role: 'user', parts: [{ text: userPrompt }] }],
+          generationConfig:   { temperature: 0.95, topP: 0.95, maxOutputTokens: 400 },
         }),
       });
 
@@ -231,10 +228,12 @@ export function useGemini() {
         throw new Error(body.error?.message ?? `HTTP ${res.status}`);
       }
 
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+      const data   = await res.json();
+      const raw    = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+      const parsed = parseGeminiJSON(raw);
+
       if (!controller.signal.aborted) {
-        setMessage(text.trim() || buildFallback(contents, context));
+        setMessage(parsed ?? buildFallback(contents, context));
       }
     } catch (err) {
       if (err.name === 'AbortError') return;
@@ -242,9 +241,7 @@ export function useGemini() {
         setMessage(buildFallback(contents, context));
       }
     } finally {
-      if (!controller.signal.aborted) {
-        setIsLoading(false);
-      }
+      if (!controller.signal.aborted) setIsLoading(false);
     }
   }
 
