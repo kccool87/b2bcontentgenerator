@@ -238,14 +238,6 @@ export default function PreviewPanel({
         ))}
       </div>
 
-      {/* AI 문구 자동 생성 */}
-      <div className="ai-section">
-        <p className="ai-label">✦ AI 자동 생성 · 클릭할 때마다 새로운 문구가 생성됩니다.</p>
-        <button className="ai-btn" onClick={onGenerateAI} disabled={isLoading}>
-          {isLoading ? '생성 중...' : '고객 제안 문구 자동 생성'}
-        </button>
-      </div>
-
       {/* 포맷 탭 */}
       <div className="format-tab-bar">
         {FORMAT_TABS.map(({ key, label }) => (
@@ -275,14 +267,31 @@ export default function PreviewPanel({
         )}
       </div>
 
-      {/* 복사 버튼 */}
-      <button
-        className={`copy-single-btn${copied ? ' copy-single-btn--done' : ''}`}
-        onClick={handleCopy}
-        disabled={isLoading}
-      >
-        {copied ? '✓ 복사 완료!' : '문구 복사하기'}
-      </button>
+      {/* 하단 액션 영역 */}
+      <div className="copy-action-area">
+        <p className="copy-action-hint">✦ 클릭할 때마다 새로운 AI 문구가 생성됩니다.</p>
+        <div className="copy-action-row">
+          <button
+            className={`ai-regen-btn${isLoading ? ' ai-regen-btn--loading' : ''}`}
+            onClick={onGenerateAI}
+            disabled={isLoading}
+            title="AI가 새로운 소개 문구를 생성합니다"
+          >
+            {isLoading ? (
+              <><span className="ai-regen-spinner" />생성 중</>
+            ) : (
+              <><span className="ai-regen-icon">✦</span>AI 문구 다시 생성</>
+            )}
+          </button>
+          <button
+            className={`copy-single-btn${copied ? ' copy-single-btn--done' : ''}`}
+            onClick={handleCopy}
+            disabled={isLoading}
+          >
+            {copied ? '✓ 복사 완료!' : '문구 복사하기'}
+          </button>
+        </div>
+      </div>
 
       <SnsBar />
     </div>
