@@ -3,6 +3,18 @@ import { useState, useEffect } from 'react';
 const NUMS = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
 function num(i) { return NUMS[i] ?? String(i + 1); }
 
+const GREETINGS = [
+  '안녕하세요? LG유플러스 OOO 담당자입니다.',
+  '안녕하세요! LG유플러스 기업솔루션팀 OOO입니다.',
+  '안녕하세요. 항상 감사드립니다. LG유플러스 OOO입니다.',
+  '안녕하세요? 고객님, 좋은 하루 되고 계신가요? LG유플러스 OOO 담당입니다.',
+  '안녕하세요! 평소 저희 서비스에 관심 가져주셔서 감사드립니다. LG유플러스 OOO입니다.',
+  '안녕하세요. LG유플러스 기업고객 담당 OOO입니다. 항상 감사드립니다.',
+  '고객님, 안녕하세요? LG유플러스 영업담당 OOO입니다.',
+  '안녕하세요! 오늘도 좋은 하루 되시길 바랍니다. LG유플러스 OOO 담당자입니다.',
+];
+function pickGreeting() { return GREETINGS[Math.floor(Math.random() * GREETINGS.length)]; }
+
 const LOADING_PHASES = [
   '콘텐츠 분석 중 ·',
   '고객 상황 파악 중 ··',
@@ -33,10 +45,11 @@ function buildPreviewTitleUrlBlock(items) {
   return items.map((c, i) => `${num(i)} ${ct(c.title)}\n${displayUrl(c.url)}`).join('\n\n');
 }
 
-// 미리보기 JSX 렌더링 — URL을 실제 하이퍼링크로 표시
-function PreviewContent({ intro, items }) {
+// 미리보기 JSX 렌더링 — 인사말 + AI문구 + URL 하이퍼링크
+function PreviewContent({ greeting, intro, items }) {
   return (
     <>
+      {greeting}{'\n\n'}
       {intro && <>{intro}{'\n\n'}</>}
       {items.map((c, i) => (
         <span key={c.id}>
@@ -128,12 +141,18 @@ export default function PreviewPanel({
 }) {
   const [copiedKey, setCopiedKey] = useState(null);
   const [phaseIdx, setPhaseIdx] = useState(0);
+  const [greeting, setGreeting] = useState(pickGreeting);
 
   useEffect(() => {
     if (!isLoading) { setPhaseIdx(0); return; }
     const id = setInterval(() => setPhaseIdx((i) => (i + 1) % LOADING_PHASES.length), 700);
     return () => clearInterval(id);
   }, [isLoading]);
+
+  // 선택 콘텐츠 수가 바뀔 때마다 인사말 랜덤 교체
+  useEffect(() => {
+    if (selectedContents.length > 0) setGreeting(pickGreeting());
+  }, [selectedContents.length]);
 
   async function handleCopy(key, text) {
     await writeClipboard(text);
@@ -153,17 +172,19 @@ export default function PreviewPanel({
     );
   }
 
-  // 소개 문구: AI 생성 시에만 표시 (기본 문구 없음)
-  const intro       = geminiMessage ?? '';
+  // 소개 문구: 인사말 + AI 생성 문구 조합
+  const intro     = geminiMessage ?? '';
+  const fullIntro = intro ? `${greeting}\n\n${intro}` : greeting;
+
   const titleBlock  = buildPreviewTitleUrlBlock(selectedContents);
-  const previewText = intro ? `${intro}\n\n${titleBlock}` : titleBlock;
+  const previewText = `${fullIntro}\n\n${titleBlock}`;
 
   const COPY_BUTTONS = [
     {
       key:     'full',
       label:   '전체 복사',
       cls:     'copy-btn--full',
-      getText: () => buildFullCopy(selectedContents, intro),
+      getText: () => buildFullCopy(selectedContents, fullIntro),
     },
     {
       key:     'url',
@@ -175,13 +196,13 @@ export default function PreviewPanel({
       key:     'email',
       label:   '이메일용 복사',
       cls:     'copy-btn--email',
-      getText: () => buildEmailCopy(selectedContents, intro),
+      getText: () => buildEmailCopy(selectedContents, fullIntro),
     },
     {
       key:     'kakao',
       label:   '메신저/문자용 복사',
       cls:     'copy-btn--kakao',
-      getText: () => buildKakaoCopy(selectedContents, intro),
+      getText: () => buildKakaoCopy(selectedContents, fullIntro),
     },
   ];
 
@@ -234,7 +255,7 @@ export default function PreviewPanel({
           </div>
         ) : (
           <pre className="preview-text">
-            <PreviewContent intro={intro} items={selectedContents} />
+            <PreviewContent greeting={greeting} intro={intro} items={selectedContents} />
           </pre>
         )}
       </div>
