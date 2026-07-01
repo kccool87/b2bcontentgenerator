@@ -3,92 +3,179 @@ import { useState, useRef } from 'react';
 const API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
+const TYPE_LABEL = {
+  INSIGHT:   '인사이트',
+  SOLUTION:  '솔루션',
+  CHECKLIST: '체크리스트',
+  CASE:      '고객사례',
+  AX_TREND:  'AX트렌드',
+};
+
+// ── 시스템 프롬프트 ─────────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are a B2B sales assistant for LG U+ Enterprise.
+
+Your job is to write a short, natural message that a sales rep can send to a business customer via KakaoTalk or SMS to introduce selected blog content.
+
+---
+
+## INPUT YOU WILL RECEIVE
+
+- Selected content category (one or more): 인사이트 / 솔루션 / 체크리스트 / 고객사례 / AX트렌드
+- Content title
+- Content summary (1–3 sentences)
+
+---
+
+## OUTPUT FORMAT
+
+Write exactly 2–3 sentences in Korean.
+Structure: [공감 or 상황 언급] → [콘텐츠 한 줄 소개] → [CTA]
+Tone: Polite but conversational. Use 합쇼체 (e.g. ~드립니다, ~드려요).
+No markdown. No bullet points. Plain text only.
+
+---
+
+## RULES BY CATEGORY
+
+### 단일 카테고리
+
+**인사이트**
+- Open with a pain point or situation the customer might relate to
+- Introduce the content as something that addresses that situation
+- Do NOT mention specific product names or features
+- DO lead with empathy, keep product references out
+
+**솔루션**
+- Introduce the content as a clear, easy-to-understand overview of the product
+- Mention what the content covers (features, pricing, etc.) in neutral terms
+- Do NOT use superlatives or exaggerated claims ("최고", "압도적" etc.)
+- DO convey clarity and credibility
+
+**체크리스트**
+- Frame the content as a self-diagnostic tool the customer can use on their own
+- Suggest it as a helpful reference, not a sales push
+- Do NOT imply "you should buy this"
+- DO use the nuance of "this might help you think it through"
+
+**고객사례**
+- Reference the customer's industry or situation if known; otherwise use general framing
+- Highlight that this is a real case with real outcomes
+- Do NOT exaggerate figures; only use what's in the content
+- DO emphasize "similar situation, real result"
+
+**AX트렌드**
+- Open with the trend topic as a light conversation starter
+- Keep it informational, low-pressure
+- Do NOT directly connect to a product pitch
+- DO keep tone casual and curious
+
+---
+
+### 복합 카테고리 (2개 이상 선택 시)
+
+Read the combination as a single narrative arc and write one cohesive message.
+Use the following logic:
+
+| 조합 | 흐름 | 문구 전략 |
+|---|---|---|
+| 인사이트 + 솔루션 | 문제 인식 → 상품 소개 | 고민을 언급한 뒤 솔루션으로 자연스럽게 연결 |
+| 인사이트 + 체크리스트 | 문제 인식 → 자가진단 | 상황 공감 후 스스로 점검해볼 것을 제안 |
+| 솔루션 + 고객사례 | 상품 소개 + 신뢰 보강 | 기능 자료와 실제 사례를 함께 보내는 구성 |
+| 인사이트 + 솔루션 + 고객사례 | 풀 퍼널 | 고민→해결책→실제 사례까지 한 흐름으로 묶기 |
+| AX트렌드 + 인사이트 | 업계 흐름 + 공감 | 트렌드로 대화 열고 페인포인트로 연결 |
+| 체크리스트 + 고객사례 | 설득 패키지 | 윗선 설득용 자료임을 자연스럽게 언급 |
+
+For combinations not listed above, identify the dominant intent and apply the closest matching logic.
+
+---
+
+## ABSOLUTE PROHIBITIONS
+
+- 과장 표현 금지: 최고, 압도적, 혁신적, 놀라운 등
+- 직접 구매/도입 유도 금지: "지금 바로 도입하세요", "구매 문의 주세요" 등
+- 마크다운 금지: 별표, 번호 목록, 헤더 등 사용 금지
+- 3문장 초과 금지
+- 영어 단어 혼용 최소화 (상품명 제외)
+- 인사말(안녕하세요·수고하세요 등) 절대 사용 금지
+- 콘텐츠 제목·링크를 그대로 인용하지 말 것 (제목·링크는 메시지 아래에 따로 첨부됨)
+
+---
+
+## EXAMPLES
+
+**[인사이트 단독]**
+입력: 카테고리=인사이트 / 제목=재택근무 확산으로 달라진 중소기업 보안 현실
+출력: 재택근무가 늘면서 보안 사고 걱정이 커지고 있는 요즘, 중소기업 담당자분들이 실제로 겪고 계신 상황을 정리한 글이 있어서 공유드립니다. 한번 살펴보시면 도움이 되실 것 같습니다.
+
+**[솔루션 단독]**
+입력: 카테고리=솔루션 / 제목=U+기업인터넷 요금제 완전 정리
+출력: U+기업인터넷의 기능과 요금제를 한눈에 보실 수 있도록 정리한 자료를 공유드립니다. 검토하실 때 참고가 되시길 바랍니다.
+
+**[체크리스트 단독]**
+입력: 카테고리=체크리스트 / 제목=우리 회사 통신 환경, 지금 괜찮을까? 자가진단 체크리스트
+출력: 통신 환경 개선을 고민 중이시라면, 먼저 이 체크리스트로 현황을 점검해보시는 것도 좋을 것 같아서 공유드려요. 부담 없이 살펴봐 주세요.
+
+**[고객사례 단독]**
+입력: 카테고리=고객사례 / 제목=물류 스타트업 A사, 지능형 CCTV 도입 후 달라진 점
+출력: 물류 업종에서 지능형 CCTV를 실제로 도입하신 고객사 사례를 공유드립니다. 비슷한 환경에 계신다면 참고가 되실 것 같습니다.
+
+**[AX트렌드 단독]**
+입력: 카테고리=AX트렌드 / 제목=2025년 중소기업이 주목해야 할 AI 도입 트렌드
+출력: 요즘 중소기업 사이에서도 AI 도입 이야기가 많이 나오고 있는데, 관련 트렌드를 정리한 글이 있어서 가볍게 공유드립니다.
+
+**[복합: 인사이트 + 솔루션]**
+입력: 카테고리=인사이트, 솔루션 / 제목들=매장 무인화의 그늘 / 지능형CCTV 상품 소개
+출력: 무인 매장 운영하시면서 보안이나 돌발 상황 관리가 걱정되신다면, 관련 고민을 다룬 글과 저희 솔루션 소개 자료를 함께 공유드립니다. 두 가지 같이 보시면 도움이 되실 것 같습니다.
+
+**[복합: 체크리스트 + 고객사례]**
+입력: 카테고리=체크리스트, 고객사례 / 제목들=VoIP 도입 전 꼭 확인할 것들 / 제조업 B사 센트릭스 도입 사례
+출력: VoIP 도입을 검토 중이시라면, 자가진단 체크리스트와 실제 도입 사례를 함께 공유드립니다. 내부 검토나 윗분 설득하실 때 참고 자료로 활용하시기 좋을 것 같습니다.
+
+---
+
+Now generate the message based on the input provided.`;
+
 // ── 폴백 메시지 ────────────────────────────────────────────────────
 const FALLBACK_SINGLE = [
   (ctx) => `${ctx} 때문에 고민 많으셨죠? 실제로 도움 됐다는 사례 위주로 골라봤습니다.`,
-  (ctx) => `보다가 ${ctx} 상황에 딱 맞을 것 같아서 바로 공유드려요. 가볍게 한번 보세요.`,
+  (ctx) => `${ctx} 상황에 딱 맞을 것 같아서 바로 공유드려요. 가볍게 한번 보세요.`,
   (ctx) => `${ctx} 검토하실 때 이 자료가 꽤 실질적인 힌트가 될 것 같습니다.`,
   (ctx) => `${ctx} 관련해서 현장에서 실제 쓰이는 내용을 담은 자료를 찾았습니다. 참고해 보세요.`,
   (ctx) => `요즘 ${ctx} 쪽으로 움직임이 많더라고요. 흐름 파악에 도움 될 자료 같아 전달드립니다.`,
-  (ctx) => `${ctx}, 아직 결정 전이시라면 이 자료 먼저 보시고 판단하시는 게 좋을 것 같습니다.`,
 ];
 
 const FALLBACK_MIXED = [
   () => `여러 관점에서 비교하실 수 있도록 관련 자료를 골라봤어요. 필요한 부분만 골라 보셔도 충분합니다.`,
   () => `의사결정 전에 한번 훑어보시면 좋을 자료들입니다. 궁금한 점 생기시면 바로 말씀해 주세요.`,
   () => `검토 단계에서 실제로 유용했다고 알려진 자료들 위주로 담았습니다. 부담 없이 봐주세요.`,
-  () => `각각 다른 각도에서 도움이 될 것 같아 함께 공유드립니다. 마음에 드는 내용 있으시면 알려주세요.`,
 ];
 
 const FALLBACK_AX_TREND = [
   () => `요즘 업계에서 조용히 속도 붙고 있는 흐름인데, 한번 훑어보시면 방향 잡는 데 도움이 될 것 같습니다.`,
   () => `전략 고민하실 때 이런 트렌드 먼저 파악하시면 훨씬 수월하더라고요. 참고용으로 공유드립니다.`,
   () => `요즘 제일 많이 언급되는 기술 흐름인데, 모르고 지나치기엔 아까운 내용입니다.`,
-  () => `시장이 어디로 가고 있는지 감 잡기 좋은 자료들입니다. 가볍게 훑어보세요.`,
-];
-
-const FALLBACK_AX_MIXED = [
-  () => `트렌드 흐름도 짚고, 실질적인 도입 힌트도 함께 담아봤습니다. 두 가지 다 유용하실 거예요.`,
-  () => `시장 방향성과 실무 활용 포인트를 같이 보실 수 있는 자료입니다. 참고해 보세요.`,
-  () => `업계 변화 흐름을 보면서 도입 방향도 같이 검토하실 수 있도록 구성했습니다.`,
-];
-
-const STYLE_VARIANTS = [
-  {
-    tone: '문제를 먼저 공감해주는 톤',
-    opener: '고객이 겪는 불편이나 고민을 한 줄로 짚어준 뒤, 이 자료가 해결 실마리가 될 수 있다는 방향으로 작성',
-  },
-  {
-    tone: '우연히 발견해 바로 공유하는 가벼운 톤',
-    opener: '영업사원이 자료를 보다가 고객 상황에 딱 맞을 것 같아 바로 전달하는 자연스러운 느낌으로 작성',
-  },
-  {
-    tone: '실무 포인트를 콕 짚는 톤',
-    opener: '실제 도입 사례나 수치·효과 포인트를 간단히 언급하며 실질적인 참고 자료임을 전달하는 방향으로 작성',
-  },
-  {
-    tone: '트렌드 인사이트를 나누는 동료 같은 톤',
-    opener: '요즘 업계에서 화두가 되는 흐름을 짧게 언급하고, 그 맥락에서 이 자료가 유익할 것이라는 방향으로 작성',
-  },
-  {
-    tone: '담백하고 여백 있는 톤',
-    opener: '과장 없이 "이런 자료가 있었는데, 참고하시면 좋을 것 같아요" 정도의 가볍고 진정성 있는 느낌으로 작성',
-  },
-  {
-    tone: '질문으로 시작하는 호기심 유발 톤',
-    opener: '고객이 공감할 만한 짧은 질문으로 시작해 자료를 자연스럽게 이어서 소개하는 방향으로 작성',
-  },
 ];
 
 function buildFallback(contents, context) {
   const { selectedProducts = [], selectedIndustries = [], query = '' } = context;
-
   const hasAxTrend   = contents.some(c => c.type === 'AX_TREND');
   const isAllAxTrend = hasAxTrend && contents.every(c => c.type === 'AX_TREND');
-  const isMixed      = selectedProducts.length > 1 || selectedIndustries.length > 1
-    || (selectedProducts.length >= 1 && selectedIndustries.length >= 1);
+  const isMixed      = contents.length > 1 || selectedProducts.length > 1 || selectedIndustries.length > 1;
 
   if (isAllAxTrend) {
     const fn = FALLBACK_AX_TREND[Math.floor(Math.random() * FALLBACK_AX_TREND.length)];
     return fn();
   }
-
-  if (hasAxTrend) {
-    const fn = FALLBACK_AX_MIXED[Math.floor(Math.random() * FALLBACK_AX_MIXED.length)];
-    return fn();
-  }
-
   if (isMixed) {
     const fn = FALLBACK_MIXED[Math.floor(Math.random() * FALLBACK_MIXED.length)];
     return fn();
   }
-
   const ctx = selectedProducts[0] || selectedIndustries[0] || query.split(' ')[0] || '솔루션';
   const fn  = FALLBACK_SINGLE[Math.floor(Math.random() * FALLBACK_SINGLE.length)];
   return fn(ctx);
 }
 
-// ── 훅 ─────────────────────────────────────────────────────────
+// ── 훅 ─────────────────────────────────────────────────────────────
 export function useGemini() {
   const [message, setMessage]     = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -115,58 +202,15 @@ export function useGemini() {
       return;
     }
 
-    const { query = '', selectedProducts = [], selectedIndustries = [] } = context;
+    // 카테고리 목록 (중복 제거)
+    const categories = [...new Set(contents.map(c => TYPE_LABEL[c.type] ?? c.type))].join(', ');
 
-    // 콘텐츠 타입 분석
-    const hasAxTrend   = contents.some(c => c.type === 'AX_TREND');
-    const isAllAxTrend = hasAxTrend && contents.every(c => c.type === 'AX_TREND');
-    const hasSolution  = contents.some(c => c.type !== 'AX_TREND');
-    const isMixed      = selectedProducts.length > 1 || selectedIndustries.length > 1
-      || (selectedProducts.length >= 1 && selectedIndustries.length >= 1);
-    const singleCtx    = selectedProducts[0] || selectedIndustries[0] || query.split(' ')[0] || '';
-    const style        = STYLE_VARIANTS[Math.floor(Math.random() * STYLE_VARIANTS.length)];
+    // 콘텐츠 목록 (제목 + 요약)
+    const contentLines = contents.length === 1
+      ? `제목: ${contents[0].title}\n요약: ${contents[0].summary}`
+      : contents.map((c, i) => `제목 ${i + 1}: ${c.title}\n요약 ${i + 1}: ${c.summary}`).join('\n');
 
-    const contextLine = [
-      query && `검색어: ${query}`,
-      selectedProducts.length  > 0 && `관련 상품: ${selectedProducts.join(', ')}`,
-      selectedIndustries.length > 0 && `관련 업종: ${selectedIndustries.join(', ')}`,
-    ].filter(Boolean).join(' / ');
-
-    const contentList = contents.map((c) => `- [${c.type}] ${c.summary}`).join('\n');
-
-    // 콘텐츠 성격에 맞는 목적 가이드
-    let purposeGuide;
-    if (isAllAxTrend) {
-      purposeGuide = `이 콘텐츠들은 특정 솔루션 도입이 아닌, AI·디지털전환 등 업계 전반의 기술 트렌드와 새로운 기술 인사이트를 담고 있습니다.
-고객이 비즈니스 트렌드를 파악하고 앞으로의 방향성을 고민하는 데 유익한 정보를 나눈다는 목적으로 작성하세요.
-솔루션 도입이나 구매 유도 뉘앙스는 절대 포함하지 마세요.`;
-    } else if (hasAxTrend && hasSolution) {
-      purposeGuide = `이 콘텐츠들은 업계 트렌드 인사이트와 솔루션 도입 관련 자료가 함께 포함되어 있습니다.
-시장 흐름 파악에 도움이 되는 정보와 도입 검토에 실질적으로 참고할 수 있는 자료를 함께 제공한다는 방향으로 작성하세요.`;
-    } else if (isMixed) {
-      purposeGuide = `여러 솔루션·업종이 섞여 있으므로, 고객이 다양한 관점을 참고해 의사결정을 내리는 데 실질적인 도움을 주고 싶다는 마음을 담아 작성하세요.`;
-    } else {
-      purposeGuide = `${singleCtx ? `${singleCtx} ` : ''}관련 고객에게, 고민하실 때 진짜 도움이 될 정보를 나눠드리고 싶다는 진정성 있는 마음으로 작성하세요.`;
-    }
-
-    const userPrompt = `B2B 영업사원이 고객에게 콘텐츠를 공유할 때 앞에 붙이는 짧은 메시지를 작성해주세요.
-
-콘텐츠 목적: ${purposeGuide}
-
-【이번 문구 스타일】
-톤: ${style.tone}
-작성 방식: ${style.opener}
-
-${contextLine ? `고객 상황: ${contextLine}\n` : ''}공유 콘텐츠 요약:
-${contentList}
-
-반드시 지켜야 할 규칙:
-- 인사말(안녕하세요·수고하세요 등) 절대 사용 금지
-- 콘텐츠 제목·링크를 그대로 인용하지 말 것 (제목·링크는 메시지 아래에 따로 첨부됨)
-- 영업적 과장이나 딱딱한 홍보 문구 금지
-- 고객에게 진정성 있게 유용한 정보를 나눈다는 느낌
-- 편안하고 자연스러운 말투 (격식 있되 부담 없게, 반말 금지)
-- 2~3문장, 100자 이내`;
+    const userPrompt = `카테고리: ${categories}\n${contentLines}`;
 
     try {
       const res = await fetch(`${API_URL}?key=${apiKey}`, {
@@ -175,12 +219,10 @@ ${contentList}
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system_instruction: {
-            parts: [{
-              text: '당신은 B2B 영업사원이 고객에게 콘텐츠를 공유할 때 앞에 붙이는 짧은 메시지를 만드는 전문 카피라이터입니다. 매번 완전히 다른 구조와 표현으로 문구를 생성해야 합니다. 문제 공감형, 우연 발견형, 실무 포인트형, 트렌드 인사이트형, 질문형 등 다양한 방식 중 하나를 선택해 작성하세요. 형식적인 인사말, 과장된 홍보 표현, 판에 박힌 시작("안녕하세요", "이번에", "도움이") 은 피하세요. 100자 이내, 자연스러운 한국어로 작성합니다.',
-            }],
+            parts: [{ text: SYSTEM_PROMPT }],
           },
           contents:         [{ role: 'user', parts: [{ text: userPrompt }] }],
-          generationConfig: { temperature: 1.0, topP: 0.95, maxOutputTokens: 220 },
+          generationConfig: { temperature: 1.0, topP: 0.95, maxOutputTokens: 300 },
         }),
       });
 
