@@ -1,6 +1,7 @@
 // AX 트렌드 최신 등록순 (lguplusenterprise.com/category/ax-trend/ 기준)
 // build-ax-trend-order.mjs 로 자동 생성
 export const AX_TREND_ORDER = [
+  'c329',
   'c074',
   'c178',
   'c073',

@@ -105,13 +105,11 @@ export const SOLUTION_ORDER = [
   'c171',
   'c172',
   'c173',
-  'c013',
   'c014',
   'c015',
   'c016',
   'c017',
   'c018',
-  'c023',
   'c041',
   'c058',
   'c059',
@@ -134,6 +132,7 @@ export const SOLUTION_ORDER = [
 ];
 
 export const CHECKLIST_ORDER = [
+  'c330',
   'c024',
   'c025',
   'c026',
@@ -169,6 +168,7 @@ export const CASE_ORDER = [
 ];
 
 export const AX_TREND_ORDER = [
+  'c329',
   'c074',
   'c178',
   'c073',

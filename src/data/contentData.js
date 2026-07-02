@@ -159,19 +159,6 @@ export const contentData = [
 
   // ── SOLUTION ─────────────────────────────────────────────
   {
-    id: 'c013',
-    title: '소상공인 사업장을 노리는 해킹·스미싱, 안심보상인터넷이 필요한 이유',
-    summary: '카드 단말기·POS·CCTV가 연결된 소상공인 네트워크가 사이버 공격 표적이 되는 구조와 차단 방법을 안내합니다.',
-    url: 'https://lguplusenterprise.com/소상공인-사업장을-노리는-해킹-스미싱-안심보상인터넷이-필요한-이유/',
-    type: 'SOLUTION',
-    products: ['안심보상인터넷'],
-    industries: ['소상공인', '소매'],
-    concerns: ['보안', '안정성'],
-    stage: '검토',
-    priority: 1,
-    recommendReason: '보안 우려가 있는 소상공인에게 도입 명분을 만들어주는 핵심 솔루션 자료입니다.',
-  },
-  {
     id: 'c014',
     title: '결재부터 근태관리까지 한곳에서, U+웍스로 바꾸는 중소기업 그룹웨어',
     summary: '흩어진 협업 도구를 하나로 통합하는 U+웍스의 전자결재·근태·문서·메신저 기능을 중소기업 관점에서 설명합니다.',
@@ -288,21 +275,20 @@ export const contentData = [
     priority: 1,
     recommendReason: '차량을 다수 운영하는 물류·운수사에 총소유비용(TCO) 절감 관점에서 제안하세요.',
   },
-  {
-    id: 'c023',
-    title: '유지 보수 현장의 긴급 출동 관리, SM엘리베이터가 LG유플러스 커넥트를 선택한 이유',
-    summary: '전국 엘리베이터 유지보수 기사의 출동 경로 최적화와 현장 도착 시간 단축을 U+커넥트로 실현한 도입 사례입니다.',
-    url: 'https://lguplusenterprise.com/유지-보수-현장의-긴급-출동-관리-sm엘리베이터가-lg유플러스-커넥트를-선택한-이유/',
-    type: 'SOLUTION',
-    products: ['U+커넥트'],
-    industries: ['제조', '서비스업'],
-    concerns: ['운영효율', '고객경험'],
-    stage: '제안',
-    priority: 2,
-    recommendReason: '현장 출동 인력을 보유한 서비스·유지보수 기업에 차량관제 도입 설득 자료로 활용하세요.',
-  },
-
   // ── CHECKLIST ────────────────────────────────────────────
+  {
+    id: 'c330',
+    title: '유선 공사는 어렵고 핫스팟은 끊긴다면? U+모바일인터넷 도입 체크리스트',
+    summary: '공사현장·임시 사무실·팝업스토어처럼 유선 인터넷 설치가 어렵거나 운영 기간이 짧은 환경에서 U+모바일인터넷 도입 전 확인해야 할 체크리스트를 정리합니다.',
+    url: 'https://lguplusenterprise.com/%ec%9c%a0%ec%84%a0-%ea%b3%b5%ec%82%ac%eb%8a%94-%ec%96%b4%eb%a0%b5%ea%b3%a0-%ed%95%ab%ec%8a%a4%ed%8c%9f%ec%9d%80-%eb%81%8a%ea%b8%b4%eb%8b%a4%eb%a9%b4-u%eb%aa%a8%eb%b0%94%ec%9d%bc%ec%9d%b8%ed%84%b0/',
+    type: 'CHECKLIST',
+    products: ['U+모바일인터넷'],
+    industries: ['건설', '소매', '스타트업', '소상공인'],
+    concerns: ['업무효율', '안정성', '비용절감'],
+    stage: '검토',
+    priority: 1,
+    recommendReason: '유선 인터넷 설치가 어려운 현장·임시 거점 운영 기업 담당자에게 셀프 점검 자료로 활용하세요.',
+  },
   {
     id: 'c024',
     title: '그룹웨어 도입 전 체크리스트, 우리 회사에 맞는 U+웍스 선택법',
@@ -4253,6 +4239,19 @@ export const contentData = [
     stage: '검토',
     priority: 2,
     recommendReason: '보안 솔루션 검토 단계의 고객에게 실제 위협 사례와 함께 제시하면 도입 필요성을 직관적으로 전달할 수 있습니다.',
+  },
+  {
+    id: 'c329',
+    title: '솔로프리너 36%는 왜 실패할까? AI 시대 1인 창업 준비부터 AI 자동화 세팅까지',
+    summary: 'AI 시대 솔로프리너의 성공과 실패 요인을 분석하고, 1인 창업자·프리랜서가 AI 자동화 도구를 활용해 업무 효율을 극대화하는 전략을 소개합니다.',
+    url: 'https://lguplusenterprise.com/axtrend_umanager_solopreneur/',
+    type: 'AX_TREND',
+    products: [],
+    industries: ['스타트업', '소상공인'],
+    concerns: ['DX', '업무효율', 'AI혁신'],
+    stage: '초기관심',
+    priority: 1,
+    recommendReason: 'AI 자동화에 관심 있는 소규모 사업자·1인 창업자 고객에게 트렌드 공감대 형성용으로 공유하세요.',
   },
 
   // ── SOLUTION (2026-06-26 신규) ────────────────────────────
