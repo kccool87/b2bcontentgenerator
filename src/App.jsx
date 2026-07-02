@@ -113,8 +113,11 @@ export default function App() {
       <div className="app-container">
         <div className="page-title-area">
           <div className="app-title">
-            <div className="logo-wrap" onClick={() => { window.location.href = '/'; }}>
-              <img src={algoLogo} alt="U+ALGO" className="title-logo" />
+            <div className="logo-container" onClick={() => { window.location.href = '/'; }}>
+              <div className="logo-wrap">
+                <img src={algoLogo} alt="U+ALGO" className="title-logo" />
+              </div>
+              <span className="logo-magnifier" aria-hidden="true" />
             </div>
             <p className="title-sub">검색 <span style={{color:'#844ff9'}}>알고</span>리즘으로 콘텐츠를 <span style={{color:'#844ff9'}}>알고</span> — 세일즈로 잇다</p>
           </div>

@@ -88,9 +88,12 @@ Return ONLY a raw JSON object. No markdown. No code blocks. No explanation.
 
 ## CRITICAL RULE — MULTIPLE CONTENT SELECTION
 
-When the input contains 2+ content items, this rule OVERRIDES ALL OTHER RULES with no exception.
+When the input contains 2+ content items, this rule OVERRIDES ALL OTHER RULES.
 
-### What you must NEVER do (❌):
+**EXCEPTION — When \`공통 상품\` appears in the prompt:**
+If the input includes a line \`공통 상품: [상품명]\`, ALL selected items are about that SAME product. In this case you SHOULD mention [상품명] naturally in the messages. Frame it as "[상품명] 관련 자료" or "[상품명] 중심으로 구성된 자료 묶음" etc. All other rules still apply (no exaggeration, no greetings, no purchase push, no title repetition). The restrictions below apply ONLY when \`공통 상품\` is NOT in the prompt.
+
+### What you must NEVER do when NO \`공통 상품\` is given (❌):
 - Focus the message on any single item while ignoring others
 - Name any specific product, solution, or service (e.g. "AI비즈콜", "U+모바일인터넷", "IoT", "클라우드" etc.)
 - Write separate sentences for each item — the output must be ONE unified message
@@ -206,9 +209,21 @@ function buildMultiFallback() {
   return { email: FALLBACK_MULTI_EMAIL[ei](), messenger: FALLBACK_MULTI_MESSENGER[mi]() };
 }
 
-// 다중 선택 응답에서 상품명 노출 여부 검사
-function hasProductLeak(parsed, contents) {
-  const names = [...new Set(contents.flatMap(c => c.products || []))].filter(p => p && p.length >= 3);
+// 모든 선택 항목에 공통으로 포함된 상품명 반환 (없으면 null)
+function getSharedProduct(contents) {
+  if (contents.length <= 1) return null;
+  const allSets = contents.map(c => new Set(c.products || []));
+  for (const p of allSets[0]) {
+    if (p && p.length >= 2 && allSets.every(s => s.has(p))) return p;
+  }
+  return null;
+}
+
+// 다중 선택 응답에서 허용되지 않은 상품명 노출 여부 검사
+// sharedProduct 는 허용된 상품명이므로 검사에서 제외
+function hasProductLeak(parsed, contents, sharedProduct = null) {
+  const names = [...new Set(contents.flatMap(c => c.products || []))]
+    .filter(p => p && p.length >= 3 && p !== sharedProduct);
   if (names.length === 0) return false;
   const text = (parsed.email + ' ' + parsed.messenger).toLowerCase();
   return names.some(p => text.includes(p.toLowerCase()));
@@ -217,8 +232,16 @@ function hasProductLeak(parsed, contents) {
 function buildFallback(contents, context) {
   const { selectedProducts = [], selectedIndustries = [], query = '' } = context;
 
-  // 다중 선택: 상품명 없는 전용 폴백
-  if (contents.length > 1) return buildMultiFallback();
+  if (contents.length > 1) {
+    // 공통 상품이 있으면 해당 상품명 사용, 없으면 상품명 없는 폴백
+    const shared = getSharedProduct(contents);
+    if (shared) {
+      const ei = Math.floor(Math.random() * FALLBACK_EMAIL.length);
+      const mi = Math.floor(Math.random() * FALLBACK_MESSENGER.length);
+      return { email: FALLBACK_EMAIL[ei](shared), messenger: FALLBACK_MESSENGER[mi](shared) };
+    }
+    return buildMultiFallback();
+  }
 
   const hasAxTrend   = contents.some(c => c.type === 'AX_TREND');
   const isAllAxTrend = hasAxTrend && contents.every(c => c.type === 'AX_TREND');
@@ -265,7 +288,8 @@ export function useGemini() {
       return;
     }
 
-    const categories = [...new Set(contents.map(c => TYPE_LABEL[c.type] ?? c.type))].join(', ');
+    const categories   = [...new Set(contents.map(c => TYPE_LABEL[c.type] ?? c.type))].join(', ');
+    const sharedProduct = contents.length > 1 ? getSharedProduct(contents) : null;
 
     let contentLines;
     if (contents.length === 1) {
@@ -286,7 +310,11 @@ export function useGemini() {
         .join('\n');
     }
 
-    const userPrompt = `카테고리: ${categories}\n선택 수: ${contents.length}개\n\n${contentLines}`;
+    // 공통 상품이 있으면 AI에게 알려서 문구에 언급하도록 허용
+    const productNote = sharedProduct
+      ? `\n공통 상품: ${sharedProduct} (이 상품명을 문구에 자연스럽게 언급하세요)`
+      : '';
+    const userPrompt = `카테고리: ${categories}\n선택 수: ${contents.length}개${productNote}\n\n${contentLines}`;
 
     try {
       const res = await fetch(`${API_URL}?key=${apiKey}`, {
@@ -310,8 +338,9 @@ export function useGemini() {
       const parsed = parseGeminiJSON(raw);
 
       if (!controller.signal.aborted) {
-        // 다중 선택: 상품명 노출 시 전용 폴백으로 교체 (모델이 훈련 데이터로 상품명 추론 방지)
-        if (parsed && contents.length > 1 && hasProductLeak(parsed, contents)) {
+        // 다중 선택: 허용되지 않은 상품명 노출 시 폴백으로 교체
+        // sharedProduct 는 허용된 상품이므로 hasProductLeak 에서 제외됨
+        if (parsed && contents.length > 1 && hasProductLeak(parsed, contents, sharedProduct)) {
           setMessage(buildMultiFallback());
         } else {
           setMessage(parsed ?? buildFallback(contents, context));

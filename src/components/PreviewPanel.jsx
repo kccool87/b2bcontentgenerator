@@ -206,25 +206,15 @@ export default function PreviewPanel({
     return () => clearInterval(id);
   }, [isLoading]);
 
+  const isEmpty = !selectedContents || selectedContents.length === 0;
+
   // 선택 콘텐츠 수가 바뀔 때마다 인사말 재추첨
   useEffect(() => {
-    if (selectedContents.length > 0) {
+    if (!isEmpty) {
       setEmailGreeting(pick(EMAIL_GREETINGS));
       setMsgGreeting(pick(MESSENGER_GREETINGS));
     }
-  }, [selectedContents.length]);
-
-  if (!selectedContents || selectedContents.length === 0) {
-    return (
-      <div className="preview-panel preview-panel--empty">
-        <div className="empty-preview-inner">
-          <div className="empty-preview-icon">✦</div>
-          <p>콘텐츠를 선택하면<br />고객 제안 문구가 생성됩니다.</p>
-        </div>
-        <SnsBar />
-      </div>
-    );
-  }
+  }, [selectedContents?.length]);
 
   // geminiMessage = { email, messenger } 객체
   const emailIntro     = geminiMessage?.email     ?? '';
@@ -251,30 +241,37 @@ export default function PreviewPanel({
           </svg>
           고객 제안 문구 미리보기
         </h2>
-        <button className="preview-reset-btn" onClick={onDeselect} title="선택된 콘텐츠 모두 해제">
-          선택해제
-        </button>
+        {!isEmpty && (
+          <button className="preview-reset-btn" onClick={onDeselect} title="선택된 콘텐츠 모두 해제">
+            선택해제
+          </button>
+        )}
       </div>
 
-      {/* 선택된 콘텐츠 — 칩 형태 */}
-      <p className="selected-chips-label">선택된 콘텐츠 ({selectedContents.length}개)</p>
-      <div className="selected-chips-wrap">
-        {selectedContents.map((item, i) => (
-          <span key={item.id} className="selected-chip" title={ct(item.title)}>
-            <span className="chip-num">{num(i)}</span>
-            <span className="chip-title">{ct(item.title)}</span>
-            <button className="chip-remove" onClick={() => onRemove(item.id)} title="선택 해제">×</button>
-          </span>
-        ))}
-      </div>
+      {/* 선택된 콘텐츠 — 칩 형태 (선택 시만 노출) */}
+      {!isEmpty && (
+        <>
+          <p className="selected-chips-label">선택된 콘텐츠 ({selectedContents.length}개)</p>
+          <div className="selected-chips-wrap">
+            {selectedContents.map((item, i) => (
+              <span key={item.id} className="selected-chip" title={ct(item.title)}>
+                <span className="chip-num">{num(i)}</span>
+                <span className="chip-title">{ct(item.title)}</span>
+                <button className="chip-remove" onClick={() => onRemove(item.id)} title="선택 해제">×</button>
+              </span>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* 포맷 탭 */}
       <div className="format-tab-bar">
         {FORMAT_TABS.map(({ key, icon, label }) => (
           <button
             key={key}
-            className={`format-tab${activeTab === key ? ' format-tab--active' : ''}`}
-            onClick={() => setActiveTab(key)}
+            className={`format-tab${activeTab === key ? ' format-tab--active' : ''}${isEmpty ? ' format-tab--inactive' : ''}`}
+            onClick={() => !isEmpty && setActiveTab(key)}
+            disabled={isEmpty}
           >
             <span className="format-tab-icon">{icon}</span>
             <span className="format-tab-label">{label}</span>
@@ -284,7 +281,12 @@ export default function PreviewPanel({
 
       {/* 미리보기 영역 */}
       <div className="preview-box">
-        {isLoading ? (
+        {isEmpty ? (
+          <div className="preview-empty-hint">
+            <span className="preview-empty-icon">✦</span>
+            <p>콘텐츠를 선택하면<br />고객 제안 문구가 생성됩니다.</p>
+          </div>
+        ) : isLoading ? (
           <div className="preview-loading">
             <span className="loading-spinner" />
             <span className="loading-text">{LOADING_PHASES[phaseIdx]}</span>
@@ -305,7 +307,7 @@ export default function PreviewPanel({
           <button
             className={`ai-regen-btn${isLoading ? ' ai-regen-btn--loading' : ''}`}
             onClick={onGenerateAI}
-            disabled={isLoading}
+            disabled={isLoading || isEmpty}
             title="AI가 새로운 소개 문구를 생성합니다"
           >
             {isLoading ? (
@@ -317,7 +319,7 @@ export default function PreviewPanel({
           <button
             className={`copy-single-btn${copied ? ' copy-single-btn--done' : ''}`}
             onClick={handleCopy}
-            disabled={isLoading}
+            disabled={isLoading || isEmpty}
           >
             {copied ? '✓ 복사 완료!' : '문구 복사하기'}
           </button>
