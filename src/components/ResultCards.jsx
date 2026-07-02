@@ -29,8 +29,19 @@ const FILTER_TYPES = ['INSIGHT', 'SOLUTION', 'CHECKLIST', 'CASE', 'AX_TREND'];
 const MAX_SUMMARY = 130;
 
 const TITLE_SUFFIX = / - LG Uplus Enterprise$/i;
+
+function decodeHtml(s) {
+  if (!s) return s;
+  return s
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
 function cleanTitle(title) {
-  return title ? title.replace(TITLE_SUFFIX, '') : title;
+  return title ? decodeHtml(title.replace(TITLE_SUFFIX, '')) : title;
 }
 
 function trimSummary(text) {

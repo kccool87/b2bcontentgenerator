@@ -239,10 +239,17 @@ export function useGemini() {
       // 단일 선택: 제목+요약 모두 전달 (특정 문맥 필요)
       contentLines = `제목: ${contents[0].title}\n요약: ${contents[0].summary}`;
     } else {
-      // 다수 선택: 제목 제거, 카테고리+요약만 전달
-      // 제목에 포함된 상품명이 문구에 노출되는 것을 방지
+      // 다수 선택: 제목·요약 모두 제거, 카테고리·관심사·업종·단계만 전달
+      // 제목/요약에 포함된 상품명이 AI 문구에 노출되는 것을 원천 차단
       contentLines = contents
-        .map((c, i) => `콘텐츠 ${i + 1} [${TYPE_LABEL[c.type] ?? c.type}]: ${c.summary}`)
+        .map((c, i) => {
+          const cat      = TYPE_LABEL[c.type] ?? c.type;
+          const concerns = c.concerns?.length  ? `관심사: ${c.concerns.join(', ')}`   : '';
+          const inds     = c.industries?.length ? `업종: ${c.industries.join(', ')}`  : '';
+          const stage    = c.stage               ? `단계: ${c.stage}`                 : '';
+          const parts    = [`[${cat}]`, concerns, inds, stage].filter(Boolean);
+          return `콘텐츠 ${i + 1}: ${parts.join(' / ')}`;
+        })
         .join('\n');
     }
 

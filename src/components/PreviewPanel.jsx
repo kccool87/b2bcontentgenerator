@@ -33,7 +33,18 @@ const LOADING_PHASES = [
 
 // ── 제목 정제 ───────────────────────────────────────────────────
 const TITLE_SUFFIX = / - LG Uplus Enterprise$/i;
-function ct(title) { return title ? title.replace(TITLE_SUFFIX, '') : title; }
+
+function decodeHtml(s) {
+  if (!s) return s;
+  return s
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function ct(title) { return title ? decodeHtml(title.replace(TITLE_SUFFIX, '')) : title; }
 
 // ── URL 처리 ────────────────────────────────────────────────────
 function cleanUrl(url) {
