@@ -116,14 +116,61 @@ ol, ul { list-style: none; }
   gap: 8px;
 }
 
+/* 로고 래퍼 — 대각선 glassy */
+@keyframes logo-sweep {
+  0%, 62%  { transform: translateX(-160%) skewX(-14deg); }
+  100%     { transform: translateX(360%)  skewX(-14deg); }
+}
+
+.logo-wrap {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 10px;
+  transition: opacity 0.15s;
+}
+.logo-wrap:hover { opacity: 0.88; }
+
+/* 대각선 정적 하이라이트 */
+.logo-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.28) 0%,
+    rgba(255,255,255,0.06) 36%,
+    transparent 54%,
+    rgba(255,255,255,0.05) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+/* 주기적 빛 스윕 */
+.logo-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent);
+  animation: logo-sweep 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: overlay;
+}
+
 .title-logo {
   height: 72px;
   width: auto;
   display: block;
   object-fit: contain;
-  transition: opacity 0.15s;
+  position: relative;
+  z-index: 0;
 }
-.title-logo:hover { opacity: 0.85; }
 
 .title-sub {
   font-size: 15px;
@@ -525,39 +572,39 @@ ol, ul { list-style: none; }
 
 /* ── 선택 상태 — 타입별 색상 ── */
 .content-card--type-insight.content-card--selected {
-  background: linear-gradient(155deg, #fff5f0 0%, #ffede0 55%, #fff 100%);
-  border: 1.5px solid rgba(234,88,12,0.38);
+  background: linear-gradient(155deg, #fffaf7 0%, #fff4ed 62%, #fff 100%);
+  border: 1.5px solid rgba(234,88,12,0.24);
 }
-.content-card--type-insight.content-card--selected .card-title   { color: #9a3412; }
-.content-card--type-insight.content-card--selected .card-summary { color: #7c2d12; }
+.content-card--type-insight.content-card--selected .card-title   { color: #c2410c; }
+.content-card--type-insight.content-card--selected .card-summary { color: #9a3412; }
 
 .content-card--type-solution.content-card--selected {
-  background: linear-gradient(155deg, #ede8ff 0%, #f5f0ff 55%, #fff 100%);
-  border: 1.5px solid rgba(132,79,249,0.42);
+  background: linear-gradient(155deg, #f6f3ff 0%, #f9f7ff 62%, #fff 100%);
+  border: 1.5px solid rgba(132,79,249,0.28);
 }
 .content-card--type-solution.content-card--selected .card-title   { color: var(--brand-dark); }
-.content-card--type-solution.content-card--selected .card-summary { color: #4c2d99; }
+.content-card--type-solution.content-card--selected .card-summary { color: #5b3ea6; }
 
 .content-card--type-checklist.content-card--selected {
-  background: linear-gradient(155deg, #eef4ff 0%, #dbeafe 55%, #fff 100%);
-  border: 1.5px solid rgba(37,99,235,0.36);
+  background: linear-gradient(155deg, #f3f7ff 0%, #eaf2ff 62%, #fff 100%);
+  border: 1.5px solid rgba(37,99,235,0.24);
 }
-.content-card--type-checklist.content-card--selected .card-title   { color: #1e40af; }
-.content-card--type-checklist.content-card--selected .card-summary { color: #1e3a8a; }
+.content-card--type-checklist.content-card--selected .card-title   { color: #1d4ed8; }
+.content-card--type-checklist.content-card--selected .card-summary { color: #1e40af; }
 
 .content-card--type-case.content-card--selected {
-  background: linear-gradient(155deg, #f0fdf5 0%, #dcfce7 55%, #fff 100%);
-  border: 1.5px solid rgba(5,150,105,0.36);
+  background: linear-gradient(155deg, #f4fef8 0%, #ebfaf1 62%, #fff 100%);
+  border: 1.5px solid rgba(5,150,105,0.24);
 }
-.content-card--type-case.content-card--selected .card-title   { color: #065f46; }
-.content-card--type-case.content-card--selected .card-summary { color: #064e3b; }
+.content-card--type-case.content-card--selected .card-title   { color: #047857; }
+.content-card--type-case.content-card--selected .card-summary { color: #065f46; }
 
 .content-card--type-ax-trend.content-card--selected {
-  background: linear-gradient(155deg, #f8fafc 0%, #e9eef4 55%, #fff 100%);
-  border: 1.5px solid rgba(71,85,105,0.38);
+  background: linear-gradient(155deg, #fafbfc 0%, #f2f5f8 62%, #fff 100%);
+  border: 1.5px solid rgba(71,85,105,0.26);
 }
-.content-card--type-ax-trend.content-card--selected .card-title   { color: #334155; }
-.content-card--type-ax-trend.content-card--selected .card-summary { color: #1e293b; }
+.content-card--type-ax-trend.content-card--selected .card-title   { color: #475569; }
+.content-card--type-ax-trend.content-card--selected .card-summary { color: #334155; }
 
 .card-header { display: flex; align-items: center; gap: 5px; margin-bottom: 9px; }
 
