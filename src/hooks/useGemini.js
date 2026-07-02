@@ -108,6 +108,9 @@ When the input contains 2+ content items, this rule OVERRIDES ALL OTHER RULES wi
 
 ### Why: The titles are already visible to the customer. Your job is ONLY to provide the warm intro copy that frames the package — not to describe individual items.
 
+### CRITICAL ADDITION — No inference allowed:
+Even if you can guess or infer what specific products are being shared (e.g. "콜센터+DX = AICC", "차량+위치 = 커넥트"), you are STRICTLY FORBIDDEN from using that inferred product name. Your output must be equally valid for ANY set of B2B solutions. Write as if you have NO IDEA what the specific products are — because your job is only to frame the curated package thematically.
+
 ## ABSOLUTE PROHIBITIONS
 
 - 과장 표현 금지: 최고, 압도적, 혁신적, 놀라운 등
@@ -160,18 +163,18 @@ function parseGeminiJSON(raw) {
   }
 }
 
-// ── 폴백 메시지 ────────────────────────────────────────────────────
+// ── 폴백 메시지 — 단일 선택용 ─────────────────────────────────────
 const FALLBACK_EMAIL = [
   (ctx) => `${ctx} 관련 내용을 검토하실 때 참고가 될 만한 자료를 공유드립니다. 살펴봐 주시면 감사하겠습니다.`,
   (ctx) => `${ctx} 상황에서 실질적으로 도움이 될 자료를 선별해 공유드립니다. 내부 검토 시 활용하시기 바랍니다.`,
   (ctx) => `${ctx} 관련하여 고객사에서 실제로 활용하신 사례와 정보를 담은 자료를 공유드립니다. 참고해 주시길 바랍니다.`,
-  ()    => `의사결정에 도움이 되실 만한 자료들을 골라 공유드립니다. 필요하신 부분 참고해 주시길 바랍니다.`,
+  ()    => `의사결정에 도움이 되실 만한 자료를 공유드립니다. 필요하신 부분 참고해 주시길 바랍니다.`,
 ];
 
 const FALLBACK_MESSENGER = [
   (ctx) => `${ctx} 관련해서 도움 될 것 같은 자료 공유드려요. 한번 봐주세요!`,
   (ctx) => `${ctx} 고민 중이시라면 이 자료 참고해 보세요. 도움이 되실 것 같아서요.`,
-  (ctx) => `${ctx} 쪽으로 요즘 좋은 자료가 있어서 바로 공유드려요.`,
+  (ctx) => `${ctx} 쪽으로 좋은 자료가 있어서 공유드려요.`,
   ()    => `관련 자료 골라봤는데, 부담 없이 한번 살펴봐 주세요!`,
 ];
 
@@ -185,8 +188,38 @@ const FALLBACK_AX_MESSENGER = [
   () => `최근 핫한 기술 흐름 정리한 자료 있어서 공유드려요!`,
 ];
 
+// ── 폴백 메시지 — 다중 선택 전용 (상품명 없음) ────────────────────
+const FALLBACK_MULTI_EMAIL = [
+  () => `업무 환경 개선 및 운영 효율화에 참고가 되실 만한 자료들을 선별하여 공유드립니다. 함께 검토해 보시면 도움이 되실 것 같습니다.`,
+  () => `솔루션 도입 검토에 도움이 될 만한 자료 묶음을 공유드립니다. 내부 검토 시 활용해 보시기 바랍니다.`,
+  () => `다양한 비즈니스 환경 개선에 참고가 되실 만한 자료들을 골라 공유드립니다. 살펴봐 주시면 감사하겠습니다.`,
+];
+const FALLBACK_MULTI_MESSENGER = [
+  () => `비즈니스 운영 개선에 도움 될 것 같은 자료 몇 가지 공유드려요. 편하게 살펴봐 주세요!`,
+  () => `관련 자료 몇 가지 골라봤는데, 시간 되실 때 한번 훑어봐 주세요.`,
+  () => `도움 될 것 같은 자료들 선별해서 공유드려요. 참고해 보세요.`,
+];
+
+function buildMultiFallback() {
+  const ei = Math.floor(Math.random() * FALLBACK_MULTI_EMAIL.length);
+  const mi = Math.floor(Math.random() * FALLBACK_MULTI_MESSENGER.length);
+  return { email: FALLBACK_MULTI_EMAIL[ei](), messenger: FALLBACK_MULTI_MESSENGER[mi]() };
+}
+
+// 다중 선택 응답에서 상품명 노출 여부 검사
+function hasProductLeak(parsed, contents) {
+  const names = [...new Set(contents.flatMap(c => c.products || []))].filter(p => p && p.length >= 3);
+  if (names.length === 0) return false;
+  const text = (parsed.email + ' ' + parsed.messenger).toLowerCase();
+  return names.some(p => text.includes(p.toLowerCase()));
+}
+
 function buildFallback(contents, context) {
   const { selectedProducts = [], selectedIndustries = [], query = '' } = context;
+
+  // 다중 선택: 상품명 없는 전용 폴백
+  if (contents.length > 1) return buildMultiFallback();
+
   const hasAxTrend   = contents.some(c => c.type === 'AX_TREND');
   const isAllAxTrend = hasAxTrend && contents.every(c => c.type === 'AX_TREND');
 
@@ -277,7 +310,12 @@ export function useGemini() {
       const parsed = parseGeminiJSON(raw);
 
       if (!controller.signal.aborted) {
-        setMessage(parsed ?? buildFallback(contents, context));
+        // 다중 선택: 상품명 노출 시 전용 폴백으로 교체 (모델이 훈련 데이터로 상품명 추론 방지)
+        if (parsed && contents.length > 1 && hasProductLeak(parsed, contents)) {
+          setMessage(buildMultiFallback());
+        } else {
+          setMessage(parsed ?? buildFallback(contents, context));
+        }
       }
     } catch (err) {
       if (err.name === 'AbortError') return;
