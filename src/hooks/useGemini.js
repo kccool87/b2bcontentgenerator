@@ -88,13 +88,25 @@ Return ONLY a raw JSON object. No markdown. No code blocks. No explanation.
 
 ## CRITICAL RULE — MULTIPLE CONTENT SELECTION
 
-When 2+ content items are selected:
-- NEVER write a message that focuses on just one of the items while ignoring others
-- Do NOT mention specific product names or solution names from the titles (e.g. "AI비즈콜", "U+모바일인터넷" etc.)
-- Write ONE broad message that naturally covers ALL selected items as a curated collection
-- Use inclusive framing: "관련 자료들을", "다양한 솔루션 정보를", "여러 관점에서 살펴보실 수 있는 자료들을", "솔루션 검토에 참고가 될 자료들을" etc.
-- The message should feel like a curated package introduction, not about any single item
-- This rule overrides all category-specific rules when multiple items exist
+When the input contains 2+ content items, this rule OVERRIDES ALL OTHER RULES with no exception.
+
+### What you must NEVER do (❌):
+- Focus the message on any single item while ignoring others
+- Name any specific product, solution, or service (e.g. "AI비즈콜", "U+모바일인터넷", "IoT", "클라우드" etc.)
+- Write separate sentences for each item — the output must be ONE unified message
+- Let any single item dominate the tone or topic
+
+### What you must do (✅):
+- Write ONE broad message treating ALL items as a single curated package
+- Use only abstract, inclusive framing:
+  "다양한 비즈니스 환경 개선에 참고가 되실 만한 자료들을"
+  "솔루션 검토에 도움이 될 자료들을 선별하여"
+  "여러 관점에서 살펴보실 수 있도록 관련 자료들을"
+  "업무 효율과 운영 환경 개선에 도움이 될 자료 묶음을"
+- Extract only the THEME (e.g. productivity, cost, security, operations) from the summaries — never the product name
+- The titles and product names are shown separately to the customer. You must NOT repeat them.
+
+### Why: The titles are already visible to the customer. Your job is ONLY to provide the warm intro copy that frames the package — not to describe individual items.
 
 ## ABSOLUTE PROHIBITIONS
 
@@ -105,6 +117,7 @@ When 2+ content items are selected:
 - 콘텐츠 제목·링크를 그대로 인용하지 말 것
 - 상품명·솔루션명을 문구 안에 직접 언급하지 말 것 (제목과 URL에 이미 포함됨)
 - 영어 단어 혼용 최소화 (상품명 제외)
+- 다수 선택 시: 요약(summary)에 등장하는 고유명사(상품명, 서비스명)도 문구에 사용 금지
 
 ---
 
@@ -119,8 +132,12 @@ When 2+ content items are selected:
 **[체크리스트 단독]**
 {"email": "통신 환경 개선을 검토 중이시라면, 먼저 현황을 점검해보실 수 있는 자가진단 자료를 공유드립니다. 내부 검토 시 활용하시기 좋을 것 같습니다.", "messenger": "혹시 통신 환경 개선 고민 중이세요? 간단히 현황 점검해볼 수 있는 자료 공유드려요."}
 
-**[복합: 인사이트 + 솔루션]**
-{"email": "무인 매장 운영 중 보안이나 돌발 상황 관리에 어려움을 겪고 계신다면, 관련 고민을 짚은 인사이트 자료와 솔루션 소개 내용을 함께 공유드립니다. 두 가지 같이 살펴보시면 도움이 되실 것 같습니다.", "messenger": "무인 매장 보안 고민되신다면, 관련 인사이트랑 솔루션 자료 같이 보내드려요. 참고해 보세요."}
+**[복합: 인사이트 + 솔루션 (같은 주제)]**
+{"email": "업무 운영 효율화와 관련하여 현장에서 자주 겪는 고민을 짚은 자료와 구체적인 솔루션 소개 내용을 함께 공유드립니다. 두 자료를 함께 살펴보시면 검토에 도움이 되실 것 같습니다.", "messenger": "운영 효율 관련해서 인사이트 자료랑 솔루션 소개 자료 같이 공유드려요. 참고해 보세요."}
+
+**[다수 선택 — 서로 다른 상품/카테고리 (핵심 예시)]**
+Input: 솔루션 A 요약 + 인사이트 B 요약 (전혀 다른 주제)
+{"email": "업무 환경 개선 및 운영 효율화에 참고가 되실 만한 자료들을 선별하여 공유드립니다. 함께 검토해 보시면 도움이 되실 것 같습니다.", "messenger": "비즈니스 운영 환경 개선에 도움 될 것 같은 자료 몇 가지 공유드려요. 편하게 살펴봐 주세요."}
 
 ---
 
@@ -215,12 +232,21 @@ export function useGemini() {
       return;
     }
 
-    const categories   = [...new Set(contents.map(c => TYPE_LABEL[c.type] ?? c.type))].join(', ');
-    const contentLines = contents.length === 1
-      ? `제목: ${contents[0].title}\n요약: ${contents[0].summary}`
-      : contents.map((c, i) => `제목 ${i + 1}: ${c.title}\n요약 ${i + 1}: ${c.summary}`).join('\n');
+    const categories = [...new Set(contents.map(c => TYPE_LABEL[c.type] ?? c.type))].join(', ');
 
-    const userPrompt = `카테고리: ${categories}\n${contentLines}`;
+    let contentLines;
+    if (contents.length === 1) {
+      // 단일 선택: 제목+요약 모두 전달 (특정 문맥 필요)
+      contentLines = `제목: ${contents[0].title}\n요약: ${contents[0].summary}`;
+    } else {
+      // 다수 선택: 제목 제거, 카테고리+요약만 전달
+      // 제목에 포함된 상품명이 문구에 노출되는 것을 방지
+      contentLines = contents
+        .map((c, i) => `콘텐츠 ${i + 1} [${TYPE_LABEL[c.type] ?? c.type}]: ${c.summary}`)
+        .join('\n');
+    }
+
+    const userPrompt = `카테고리: ${categories}\n선택 수: ${contents.length}개\n\n${contentLines}`;
 
     try {
       const res = await fetch(`${API_URL}?key=${apiKey}`, {
