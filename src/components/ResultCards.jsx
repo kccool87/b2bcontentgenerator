@@ -91,12 +91,12 @@ const PAGE_STEP = 10;
 
 export default function ResultCards({ results, allResults, selectedIds, onToggle, isInitial, showAll, onToggleAll, onTabClick, query }) {
   const [activeType, setActiveType] = useState(null);
-  const [sortMode, setSortMode] = useState(null); // null=랜덤, 'latest', 'relevance'
+  const [sortMode, setSortMode] = useState(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_INIT);
 
   // 모바일 스와이프 vs 탭 구분
-  // touchmove는 브라우저 네이티브 스크롤 시 취소될 수 있어 신뢰도가 낮음.
-  // touchend는 스크롤 후에도 항상 발사되므로 여기서 delta 를 최종 확인한다.
+  // touchmove는 브라우저가 네이티브 스크롤을 가로채면 취소될 수 있음.
+  // touchend는 스크롤 후에도 항상 발사되므로 여기서 최종 delta를 확인한다.
   const touchStartX = useRef(0);
   const blockNextClick = useRef(false);
   const SWIPE_THRESHOLD = 6;
@@ -106,19 +106,21 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
     blockNextClick.current = false;
   }
   function onTabTouchMove(e) {
-    // touchmove가 살아있을 때 조기 감지 (최적화)
     if (Math.abs(e.touches[0].clientX - touchStartX.current) > SWIPE_THRESHOLD) {
       blockNextClick.current = true;
     }
   }
   function onTabTouchEnd(e) {
-    // touchmove가 취소됐어도 여기서 재확인
     if (Math.abs(e.changedTouches[0].clientX - touchStartX.current) > SWIPE_THRESHOLD) {
       blockNextClick.current = true;
     }
   }
 
-  // 탭·정렬·결과가 바뀔 때마다 노출 수 초기화
+  function guardClick(fn) {
+    if (blockNextClick.current) { blockNextClick.current = false; return; }
+    fn();
+  }
+
   useEffect(() => { setVisibleCount(PAGE_INIT); }, [activeType, sortMode, results, showAll]);
 
   function toggleFilter(type) {
@@ -138,7 +140,46 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   const hasQuery = Boolean(query?.trim());
 
-  const SortBar = () => (
+  // JSX 변수로 정의 — <FilterBar /> 컴포넌트 대신 {filterBar} 사용.
+  // 내부에 컴포넌트로 정의하면 상태 변경마다 새 함수 레퍼런스가 생겨
+  // React가 DOM을 언마운트·재마운트 → scrollLeft 초기화됨.
+  // JSX 변수는 div/button 타입으로 reconcile되어 DOM을 재생성하지 않음.
+  const filterBar = (
+    <div className="type-filter-bar">
+      <div
+        className="type-filter-tabs"
+        onTouchStart={onTabTouchStart}
+        onTouchMove={onTabTouchMove}
+        onTouchEnd={onTabTouchEnd}
+      >
+        <button
+          className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
+          onClick={() => guardClick(() => { onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); })}
+        >
+          전체 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
+        </button>
+
+        {FILTER_TYPES.map((type) => {
+          const meta     = TYPE_META[type];
+          const count    = counts[type] ?? 0;
+          const isActive = activeType === type;
+          const disabled = count === 0 && !isInitial;
+          return (
+            <button
+              key={type}
+              className={`type-filter-btn ${meta.filter}${isActive ? ' type-filter-btn--active' : ''}${disabled ? ' type-filter-btn--empty' : ''}`}
+              onClick={() => guardClick(() => toggleFilter(type))}
+              disabled={disabled}
+            >
+              {meta.label} {count > 0 && <span className="filter-btn-count">{count}</span>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const sortBar = (
     <div className="sort-bar">
       <button
         className={`sort-btn${sortMode === 'latest' ? ' sort-btn--active' : ''}`}
@@ -160,52 +201,11 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
     </div>
   );
 
-  const FilterBar = () => (
-    <div className="type-filter-bar">
-      <div
-        className="type-filter-tabs"
-        onTouchStart={onTabTouchStart}
-        onTouchMove={onTabTouchMove}
-        onTouchEnd={onTabTouchEnd}
-      >
-        <button
-          className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
-          onClick={() => {
-            if (blockNextClick.current) { blockNextClick.current = false; return; }
-            onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.();
-          }}
-        >
-          전체 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
-        </button>
-
-        {FILTER_TYPES.map((type) => {
-          const meta     = TYPE_META[type];
-          const count    = counts[type] ?? 0;
-          const isActive = activeType === type;
-          const disabled = count === 0 && !isInitial;
-          return (
-            <button
-              key={type}
-              className={`type-filter-btn ${meta.filter}${isActive ? ' type-filter-btn--active' : ''}${disabled ? ' type-filter-btn--empty' : ''}`}
-              onClick={() => {
-                if (blockNextClick.current) { blockNextClick.current = false; return; }
-                toggleFilter(type);
-              }}
-              disabled={disabled}
-            >
-              {meta.label} {count > 0 && <span className="filter-btn-count">{count}</span>}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-
   if (isInitial) {
     return (
       <>
-        <FilterBar />
-        <SortBar />
+        {filterBar}
+        {sortBar}
         <div className="cards-container">
           <SkeletonGrid />
         </div>
@@ -216,8 +216,8 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   if (!results || results.length === 0) {
     return (
       <>
-        <FilterBar />
-        <SortBar />
+        {filterBar}
+        {sortBar}
         <div className="cards-container">
           <div className="no-results-msg">
             <p>일치하는 콘텐츠가 없습니다.</p>
@@ -249,8 +249,8 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   return (
     <>
-      <FilterBar />
-      <SortBar />
+      {filterBar}
+      {sortBar}
 
       <div className="cards-container">
         {filtered.length === 0 ? (
