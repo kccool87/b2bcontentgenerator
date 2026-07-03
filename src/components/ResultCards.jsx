@@ -95,15 +95,26 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   const [visibleCount, setVisibleCount] = useState(PAGE_INIT);
 
   // 모바일 스와이프 vs 탭 구분
+  // touchmove는 브라우저 네이티브 스크롤 시 취소될 수 있어 신뢰도가 낮음.
+  // touchend는 스크롤 후에도 항상 발사되므로 여기서 delta 를 최종 확인한다.
   const touchStartX = useRef(0);
-  const isSwiping = useRef(false);
+  const blockNextClick = useRef(false);
+  const SWIPE_THRESHOLD = 6;
+
   function onTabTouchStart(e) {
     touchStartX.current = e.touches[0].clientX;
-    isSwiping.current = false;
+    blockNextClick.current = false;
   }
   function onTabTouchMove(e) {
-    if (Math.abs(e.touches[0].clientX - touchStartX.current) > 6) {
-      isSwiping.current = true;
+    // touchmove가 살아있을 때 조기 감지 (최적화)
+    if (Math.abs(e.touches[0].clientX - touchStartX.current) > SWIPE_THRESHOLD) {
+      blockNextClick.current = true;
+    }
+  }
+  function onTabTouchEnd(e) {
+    // touchmove가 취소됐어도 여기서 재확인
+    if (Math.abs(e.changedTouches[0].clientX - touchStartX.current) > SWIPE_THRESHOLD) {
+      blockNextClick.current = true;
     }
   }
 
@@ -155,10 +166,14 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
         className="type-filter-tabs"
         onTouchStart={onTabTouchStart}
         onTouchMove={onTabTouchMove}
+        onTouchEnd={onTabTouchEnd}
       >
         <button
           className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
-          onClick={() => { if (isSwiping.current) return; onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); }}
+          onClick={() => {
+            if (blockNextClick.current) { blockNextClick.current = false; return; }
+            onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.();
+          }}
         >
           전체 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
         </button>
@@ -172,7 +187,10 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
             <button
               key={type}
               className={`type-filter-btn ${meta.filter}${isActive ? ' type-filter-btn--active' : ''}${disabled ? ' type-filter-btn--empty' : ''}`}
-              onClick={() => { if (isSwiping.current) return; toggleFilter(type); }}
+              onClick={() => {
+                if (blockNextClick.current) { blockNextClick.current = false; return; }
+                toggleFilter(type);
+              }}
               disabled={disabled}
             >
               {meta.label} {count > 0 && <span className="filter-btn-count">{count}</span>}
