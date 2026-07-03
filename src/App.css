@@ -186,6 +186,21 @@ ol, ul { list-style: none; }
   line-height: 1.4;
 }
 
+@keyframes algo-rise {
+  0%, 100% { transform: translateY(0); }
+  12%       { transform: translateY(-6px); }
+  24%       { transform: translateY(0); }
+}
+
+.title-algo {
+  display: inline-block;
+  color: #844ff9;
+  animation: algo-rise 3s ease-in-out infinite;
+}
+.title-algo--2 {
+  animation-delay: 0.38s;
+}
+
 /* ══════════════════════════════════════════
    Main Layout
    ══════════════════════════════════════════ */

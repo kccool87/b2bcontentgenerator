@@ -118,7 +118,7 @@ export default function App() {
                 <img src={algoLogo} alt="U+ALGO" className="title-logo" />
               </div>
             </div>
-            <p className="title-sub">검색 <span style={{color:'#844ff9'}}>알고</span>리즘으로 콘텐츠를 <span style={{color:'#844ff9'}}>알고</span> — 세일즈로 잇다</p>
+            <p className="title-sub">검색 <span className="title-algo title-algo--1">알고</span>리즘으로 콘텐츠를 <span className="title-algo title-algo--2">알고</span> — 세일즈로 잇다</p>
           </div>
         </div>
 
