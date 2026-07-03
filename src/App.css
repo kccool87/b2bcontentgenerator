@@ -201,23 +201,24 @@ ol, ul { list-style: none; }
   animation-delay: 0.38s;
 }
 
-/* 5s 기준: — → 세일즈로 → 잇다 순차 페이드인 */
+/* 5s 기준: — → 세일즈로 → 잇다 겹치며 순차 페이드인
+   이전 단어가 60% 나타났을 때 다음 단어 시작 → 자연스러운 릴레이 */
 @keyframes sf1 {
   0%, 32%   { opacity: 0; }
-  46%       { opacity: 1; }
-  80%       { opacity: 1; }
+  50%       { opacity: 1; }
+  82%       { opacity: 1; }
   97%, 100% { opacity: 0; }
 }
 @keyframes sf2 {
-  0%, 46%   { opacity: 0; }
-  60%       { opacity: 1; }
-  80%       { opacity: 1; }
+  0%, 43%   { opacity: 0; }
+  61%       { opacity: 1; }
+  82%       { opacity: 1; }
   97%, 100% { opacity: 0; }
 }
 @keyframes sf3 {
-  0%, 60%   { opacity: 0; }
-  74%       { opacity: 1; }
-  80%       { opacity: 1; }
+  0%, 54%   { opacity: 0; }
+  72%       { opacity: 1; }
+  82%       { opacity: 1; }
   97%, 100% { opacity: 0; }
 }
 
