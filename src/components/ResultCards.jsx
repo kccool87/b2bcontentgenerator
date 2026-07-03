@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { INSIGHT_ORDER, SOLUTION_ORDER, CHECKLIST_ORDER, CASE_ORDER, AX_TREND_ORDER } from '../data/contentOrder.js';
 
 const TYPE_META = {
@@ -94,6 +94,19 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   const [sortMode, setSortMode] = useState(null); // null=랜덤, 'latest', 'relevance'
   const [visibleCount, setVisibleCount] = useState(PAGE_INIT);
 
+  // 모바일 스와이프 vs 탭 구분
+  const touchStartX = useRef(0);
+  const isSwiping = useRef(false);
+  function onTabTouchStart(e) {
+    touchStartX.current = e.touches[0].clientX;
+    isSwiping.current = false;
+  }
+  function onTabTouchMove(e) {
+    if (Math.abs(e.touches[0].clientX - touchStartX.current) > 6) {
+      isSwiping.current = true;
+    }
+  }
+
   // 탭·정렬·결과가 바뀔 때마다 노출 수 초기화
   useEffect(() => { setVisibleCount(PAGE_INIT); }, [activeType, sortMode, results, showAll]);
 
@@ -138,10 +151,14 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   const FilterBar = () => (
     <div className="type-filter-bar">
-      <div className="type-filter-tabs">
+      <div
+        className="type-filter-tabs"
+        onTouchStart={onTabTouchStart}
+        onTouchMove={onTabTouchMove}
+      >
         <button
           className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
-          onClick={() => { onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); }}
+          onClick={() => { if (isSwiping.current) return; onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); }}
         >
           전체 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
         </button>
@@ -155,7 +172,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
             <button
               key={type}
               className={`type-filter-btn ${meta.filter}${isActive ? ' type-filter-btn--active' : ''}${disabled ? ' type-filter-btn--empty' : ''}`}
-              onClick={() => toggleFilter(type)}
+              onClick={() => { if (isSwiping.current) return; toggleFilter(type); }}
               disabled={disabled}
             >
               {meta.label} {count > 0 && <span className="filter-btn-count">{count}</span>}
