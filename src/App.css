@@ -180,8 +180,8 @@ ol, ul { list-style: none; }
 
 .title-sub {
   font-size: 15px;
-  font-weight: 500;
-  color: var(--text-3);
+  font-weight: 700;
+  color: var(--text-2);
   letter-spacing: -0.2px;
   line-height: 1.4;
 }
