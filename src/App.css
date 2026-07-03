@@ -195,23 +195,23 @@ ol, ul { list-style: none; }
 .title-algo {
   display: inline-block;
   color: #844ff9;
-  animation: algo-rise 3s ease-in-out infinite;
+  animation: algo-rise 5s ease-in-out infinite;
 }
 .title-algo--2 {
   animation-delay: 0.38s;
 }
 
-/* 알고 두 개 모두 복귀(~37%) 후 페이드인, 루프 직전에 페이드아웃 */
+/* 5s 기준: 알고 두 개 복귀(~32%) → 페이드인(32→58%, 1.3s) → 유지 → 페이드아웃 */
 @keyframes sales-fadein {
-  0%, 37%  { opacity: 0; }
-  48%      { opacity: 1; }
-  88%      { opacity: 1; }
-  100%     { opacity: 0; }
+  0%, 32%  { opacity: 0; }
+  58%      { opacity: 1; }
+  80%      { opacity: 1; }
+  97%, 100% { opacity: 0; }
 }
 
 .title-sales {
   display: inline;
-  animation: sales-fadein 3s ease-in-out infinite;
+  animation: sales-fadein 5s ease-in-out infinite;
   opacity: 0;
 }
 
