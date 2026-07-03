@@ -201,6 +201,20 @@ ol, ul { list-style: none; }
   animation-delay: 0.38s;
 }
 
+/* 알고 두 개 모두 복귀(~37%) 후 페이드인, 루프 직전에 페이드아웃 */
+@keyframes sales-fadein {
+  0%, 37%  { opacity: 0; }
+  48%      { opacity: 1; }
+  88%      { opacity: 1; }
+  100%     { opacity: 0; }
+}
+
+.title-sales {
+  display: inline;
+  animation: sales-fadein 3s ease-in-out infinite;
+  opacity: 0;
+}
+
 /* ══════════════════════════════════════════
    Main Layout
    ══════════════════════════════════════════ */
