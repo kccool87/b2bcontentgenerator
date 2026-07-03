@@ -201,19 +201,30 @@ ol, ul { list-style: none; }
   animation-delay: 0.38s;
 }
 
-/* 5s 기준: 알고 두 개 복귀(~32%) → 페이드인(32→58%, 1.3s) → 유지 → 페이드아웃 */
-@keyframes sales-fadein {
-  0%, 32%  { opacity: 0; }
-  58%      { opacity: 1; }
-  80%      { opacity: 1; }
+/* 5s 기준: — → 세일즈로 → 잇다 순차 페이드인 */
+@keyframes sf1 {
+  0%, 32%   { opacity: 0; }
+  46%       { opacity: 1; }
+  80%       { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+@keyframes sf2 {
+  0%, 46%   { opacity: 0; }
+  60%       { opacity: 1; }
+  80%       { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+@keyframes sf3 {
+  0%, 60%   { opacity: 0; }
+  74%       { opacity: 1; }
+  80%       { opacity: 1; }
   97%, 100% { opacity: 0; }
 }
 
-.title-sales {
-  display: inline;
-  animation: sales-fadein 5s ease-in-out infinite;
-  opacity: 0;
-}
+.title-sales { display: inline; }
+.ts1 { display: inline; opacity: 0; animation: sf1 5s ease-in-out infinite; }
+.ts2 { display: inline; opacity: 0; animation: sf2 5s ease-in-out infinite; }
+.ts3 { display: inline; opacity: 0; animation: sf3 5s ease-in-out infinite; }
 
 /* ══════════════════════════════════════════
    Main Layout
