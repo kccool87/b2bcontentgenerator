@@ -22,6 +22,15 @@ const MESSENGER_GREETINGS = [
   '안녕하세요! LG유플러스 OOO 담당자입니다, 연락드려요.',
 ];
 
+const EMAIL_CLOSINGS = [
+  '감사합니다. 좋은 하루 되세요.\n-LG유플러스 OOO 드림-',
+  '살펴보시고 궁금하신 점 있으시면 편히 말씀해 주세요. 감사합니다.\n-LG유플러스 OOO 드림-',
+  '검토하시다가 도움이 필요하신 부분이 있으면 언제든지 연락 주세요. 감사합니다.\n-LG유플러스 OOO 드림-',
+  '항상 좋은 성과 있으시길 바랍니다. 감사합니다.\n-LG유플러스 OOO 드림-',
+  '궁금하신 사항은 언제든지 말씀해 주세요. 늘 감사드립니다.\n-LG유플러스 OOO 드림-',
+  '검토하시다가 궁금하신 점 있으시면 언제든지 말씀해 주시기 바랍니다. 좋은 하루 되세요.\n-LG유플러스 OOO 드림-',
+];
+
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 const LOADING_PHASES = [
@@ -71,8 +80,8 @@ function UrlLink({ item }) {
 
 // ── 탭별 미리보기 JSX ────────────────────────────────────────────
 
-// 이메일: 합쇼체 인사 + 격식 도입문 + 제목·요약·URL + 맺음말
-function EmailPreview({ greeting, intro, items }) {
+// 이메일: 합쇼체 인사 + 격식 도입문 + 제목·요약·URL + 랜덤 맺음말
+function EmailPreview({ greeting, intro, items, closing }) {
   return (
     <>
       {greeting}{'\n\n'}
@@ -85,7 +94,7 @@ function EmailPreview({ greeting, intro, items }) {
           <UrlLink item={c} />
         </span>
       ))}
-      {'\n\n검토하시다가 궁금하신 점 있으시면 언제든지 말씀해 주시기 바랍니다.'}
+      {'\n\n'}{closing}
     </>
   );
 }
@@ -122,12 +131,12 @@ function UrlPreview({ items }) {
 }
 
 // ── 복사용 plain text 빌더 ───────────────────────────────────────
-function buildEmailCopy(items, greeting, intro) {
+function buildEmailCopy(items, greeting, intro, closing) {
   const head = intro ? `${greeting}\n\n${intro}` : greeting;
   const body = items
     .map((c, i) => `${num(i)} ${ct(c.title)}\n- ${c.summary}\n${cleanUrl(c.url)}`)
     .join('\n\n');
-  return `${head}\n\n${body}\n\n검토하시다가 궁금하신 점 있으시면 언제든지 말씀해 주시기 바랍니다.`;
+  return `${head}\n\n${body}\n\n${closing}`;
 }
 
 function buildMessengerCopy(items, greeting, intro) {
@@ -199,6 +208,7 @@ export default function PreviewPanel({
   const [phaseIdx, setPhaseIdx]             = useState(0);
   const [emailGreeting, setEmailGreeting]   = useState(() => pick(EMAIL_GREETINGS));
   const [msgGreeting,   setMsgGreeting]     = useState(() => pick(MESSENGER_GREETINGS));
+  const [emailClosing,  setEmailClosing]    = useState(() => pick(EMAIL_CLOSINGS));
 
   useEffect(() => {
     if (!isLoading) { setPhaseIdx(0); return; }
@@ -208,11 +218,12 @@ export default function PreviewPanel({
 
   const isEmpty = !selectedContents || selectedContents.length === 0;
 
-  // 선택 콘텐츠 수가 바뀔 때마다 인사말 재추첨
+  // 선택 콘텐츠 수가 바뀔 때마다 인사말·맺음말 재추첨
   useEffect(() => {
     if (!isEmpty) {
       setEmailGreeting(pick(EMAIL_GREETINGS));
       setMsgGreeting(pick(MESSENGER_GREETINGS));
+      setEmailClosing(pick(EMAIL_CLOSINGS));
     }
   }, [selectedContents?.length]);
 
@@ -221,7 +232,7 @@ export default function PreviewPanel({
   const messengerIntro = geminiMessage?.messenger ?? '';
 
   function getCopyText() {
-    if (activeTab === 'email')     return buildEmailCopy(selectedContents, emailGreeting, emailIntro);
+    if (activeTab === 'email')     return buildEmailCopy(selectedContents, emailGreeting, emailIntro, emailClosing);
     if (activeTab === 'messenger') return buildMessengerCopy(selectedContents, msgGreeting, messengerIntro);
     return buildUrlCopy(selectedContents);
   }
@@ -293,7 +304,7 @@ export default function PreviewPanel({
           </div>
         ) : (
           <pre className="preview-text">
-            {activeTab === 'email'     && <EmailPreview     greeting={emailGreeting} intro={emailIntro}     items={selectedContents} />}
+            {activeTab === 'email'     && <EmailPreview     greeting={emailGreeting} intro={emailIntro}     items={selectedContents} closing={emailClosing} />}
             {activeTab === 'messenger' && <MessengerPreview greeting={msgGreeting}   intro={messengerIntro} items={selectedContents} />}
             {activeTab === 'url'       && <UrlPreview       items={selectedContents} />}
           </pre>
