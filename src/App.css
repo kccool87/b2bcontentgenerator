@@ -649,8 +649,8 @@ ol, ul { list-style: none; }
 .content-card--type-case.content-card--selected .card-summary { color: #065f46; }
 
 .content-card--type-ax-trend.content-card--selected {
-  background: linear-gradient(155deg, #e8ecf0 0%, #d4dbe4 55%, #e2e8ef 100%);
-  border: 1.5px solid rgba(71,85,105,0.45);
+  background: linear-gradient(155deg, #f4f6f8 0%, #e9ecf1 62%, #fff 100%);
+  border: 1.5px solid rgba(71,85,105,0.24);
 }
 .content-card--type-ax-trend.content-card--selected .card-title   { color: #475569; }
 .content-card--type-ax-trend.content-card--selected .card-summary { color: #334155; }
