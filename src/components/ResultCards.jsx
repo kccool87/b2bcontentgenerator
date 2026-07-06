@@ -99,9 +99,9 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   // touchend는 스크롤 후에도 항상 발사되므로 여기서 최종 delta를 확인한다.
   const touchStartX = useRef(0);
   const blockNextClick = useRef(false);
-  const lastActionAt = useRef(0);
+  const cardActionMap = useRef(new Map());
   const SWIPE_THRESHOLD = 6;
-  const ACTION_COOLDOWN = 300;
+  const CARD_COOLDOWN = 350;
 
   function onTabTouchStart(e) {
     touchStartX.current = e.touches[0].clientX;
@@ -120,16 +120,14 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   function guardClick(fn) {
     if (blockNextClick.current) { blockNextClick.current = false; return; }
-    const now = Date.now();
-    if (now - lastActionAt.current < ACTION_COOLDOWN) return;
-    lastActionAt.current = now;
     fn();
   }
 
-  function guardCardClick(fn) {
+  // 동일 카드 연속 탭(더블탭) 방지 — 다른 카드는 즉시 반응
+  function guardCardClick(id, fn) {
     const now = Date.now();
-    if (now - lastActionAt.current < ACTION_COOLDOWN) return;
-    lastActionAt.current = now;
+    if (now - (cardActionMap.current.get(id) ?? 0) < CARD_COOLDOWN) return;
+    cardActionMap.current.set(id, now);
     fn();
   }
 
@@ -282,7 +280,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
                   <div
                     key={item.id}
                     className={`content-card content-card--type-${item.type.toLowerCase().replace('_', '-')}${selected ? ' content-card--selected' : ''}`}
-                    onClick={() => guardCardClick(() => onToggle(item.id))}
+                    onClick={() => guardCardClick(item.id, () => onToggle(item.id))}
                     role="button"
                     aria-pressed={selected}
                   >
