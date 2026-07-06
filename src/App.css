@@ -457,6 +457,7 @@ ol, ul { list-style: none; }
   border: 1.5px solid var(--border);
   background: var(--bg-card);
   color: var(--text-3);
+  touch-action: manipulation;
   transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s, box-shadow 0.15s;
   white-space: nowrap;
 }
@@ -588,6 +589,7 @@ ol, ul { list-style: none; }
   border: 1.5px solid var(--border);
   border-left: 3px solid transparent;
   cursor: pointer;
+  touch-action: manipulation;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.18s, background 0.2s;
   box-shadow: var(--shadow-xs);
   display: flex;

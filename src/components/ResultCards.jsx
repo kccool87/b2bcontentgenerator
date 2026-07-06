@@ -99,7 +99,9 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
   // touchend는 스크롤 후에도 항상 발사되므로 여기서 최종 delta를 확인한다.
   const touchStartX = useRef(0);
   const blockNextClick = useRef(false);
+  const lastActionAt = useRef(0);
   const SWIPE_THRESHOLD = 6;
+  const ACTION_COOLDOWN = 300;
 
   function onTabTouchStart(e) {
     touchStartX.current = e.touches[0].clientX;
@@ -118,6 +120,16 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
 
   function guardClick(fn) {
     if (blockNextClick.current) { blockNextClick.current = false; return; }
+    const now = Date.now();
+    if (now - lastActionAt.current < ACTION_COOLDOWN) return;
+    lastActionAt.current = now;
+    fn();
+  }
+
+  function guardCardClick(fn) {
+    const now = Date.now();
+    if (now - lastActionAt.current < ACTION_COOLDOWN) return;
+    lastActionAt.current = now;
     fn();
   }
 
@@ -270,7 +282,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
                   <div
                     key={item.id}
                     className={`content-card content-card--type-${item.type.toLowerCase().replace('_', '-')}${selected ? ' content-card--selected' : ''}`}
-                    onClick={() => onToggle(item.id)}
+                    onClick={() => guardCardClick(() => onToggle(item.id))}
                     role="button"
                     aria-pressed={selected}
                   >
