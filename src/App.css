@@ -1,48 +1,47 @@
 /* ══════════════════════════════════════════
-   CSS Variables — Dark Mode
+   CSS Variables — Light / Warm Neutral
    ══════════════════════════════════════════ */
 :root {
   /* Brand */
-  --brand:       #9d6fff;
-  --brand-dark:  #7c52f5;
-  --brand-light: rgba(157, 111, 255, 0.12);
-  --brand-glow:  rgba(157, 111, 255, 0.28);
+  --brand:       #844ff9;
+  --brand-dark:  #6b38e8;
+  --brand-light: rgba(132, 79, 249, 0.07);
+  --brand-glow:  rgba(132, 79, 249, 0.18);
 
   /* Backgrounds */
-  --bg-page:    #111318;
-  --bg-card:    #1c1f2c;
-  --bg-muted:   #252836;
-  --bg-input:   #1c1f2c;
-  --bg-shimmer: #2e3347;
+  --bg-page:  #f0f0ea;
+  --bg-card:  #ffffff;
+  --bg-muted: #eceae3;
+  --bg-input: #ffffff;
 
   /* Borders */
-  --border:       #2e3347;
+  --border:       #dddcd2;
   --border-focus: var(--brand);
 
   /* Text */
-  --text-1: #e8eaf0;
-  --text-2: #b8bac8;
-  --text-3: #7a7c8c;
-  --text-4: #4e5068;
+  --text-1: #1a1a1a;
+  --text-2: #333333;
+  --text-3: #666666;
+  --text-4: #999999;
 
   /* Type badge colors */
-  --type-case:      #34d399;
-  --type-checklist: #60a5fa;
-  --type-solution:  #a78bfa;
-  --type-insight:   #fb923c;
-  --type-ax-trend:  #94a3b8;
+  --type-case:      #059669;
+  --type-checklist: #2563eb;
+  --type-solution:  #7c3aed;
+  --type-insight:   #ea580c;
+  --type-ax-trend:  #475569;
 
   /* Stage */
-  --stage-init:    #64748b;
-  --stage-review:  #60a5fa;
-  --stage-propose: #fbbf24;
-  --stage-pitch:   #f87171;
+  --stage-init:    #94a3b8;
+  --stage-review:  #3b82f6;
+  --stage-propose: #f59e0b;
+  --stage-pitch:   #ef4444;
 
   /* Shadows */
-  --shadow-xs: 0 1px 3px rgba(0,0,0,0.45);
-  --shadow-sm: 0 1px 5px rgba(0,0,0,0.50), 0 1px 2px rgba(0,0,0,0.35);
-  --shadow-md: 0 4px 20px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.40);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.70);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
 
   /* Radii */
   --r-xs: 4px;
@@ -520,7 +519,7 @@ ol, ul { list-style: none; }
 }
 
 .card-skeleton {
-  background: linear-gradient(90deg, var(--bg-muted) 25%, var(--bg-shimmer) 50%, var(--bg-muted) 75%);
+  background: linear-gradient(90deg, var(--bg-muted) 25%, #e8e7e0 50%, var(--bg-muted) 75%);
   background-size: 200% 100%;
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
@@ -607,7 +606,7 @@ ol, ul { list-style: none; }
 .content-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
-  border-color: #3e4258;
+  border-color: #ccc9bf;
 }
 
 /* ── 선택 상태 — 기본 ── */
@@ -618,42 +617,41 @@ ol, ul { list-style: none; }
 .content-card--selected::before { background: transparent; }
 .content-card--selected:hover   { box-shadow: none; transform: translateY(-5px); }
 
-/* ── 선택 상태 — 타입별 색상 (dark mode) ── */
+/* ── 선택 상태 — 타입별 색상 ── */
 .content-card--type-insight.content-card--selected {
-  background: linear-gradient(155deg, #271a10 0%, #2c1e13 55%, #1f1916 100%);
-  border: 1.5px solid rgba(251,146,60,0.40);
+  background: linear-gradient(155deg, #fffaf7 0%, #fff4ed 62%, #fff 100%);
+  border: 1.5px solid rgba(234,88,12,0.24);
 }
-.content-card--type-insight.content-card--selected .card-title   { color: #fb923c; }
-.content-card--type-insight.content-card--selected .card-summary { color: #fdba74; }
+.content-card--type-insight.content-card--selected .card-title   { color: #c2410c; }
+.content-card--type-insight.content-card--selected .card-summary { color: #9a3412; }
 
 .content-card--type-solution.content-card--selected {
-  background: linear-gradient(155deg, #211a3c 0%, #1e1838 55%, #1b1c2e 100%);
-  border: 1.5px solid rgba(167,139,250,0.40);
+  background: linear-gradient(155deg, #f6f3ff 0%, #f9f7ff 62%, #fff 100%);
+  border: 1.5px solid rgba(132,79,249,0.28);
 }
-.content-card--type-solution.content-card--selected .card-title   { color: #a78bfa; }
-.content-card--type-solution.content-card--selected .card-summary { color: #c4b5fd; }
+.content-card--type-solution.content-card--selected .card-title   { color: var(--brand-dark); }
+.content-card--type-solution.content-card--selected .card-summary { color: #5b3ea6; }
 
 .content-card--type-checklist.content-card--selected {
-  background: linear-gradient(155deg, #111c38 0%, #111c36 55%, #131924 100%);
-  border: 1.5px solid rgba(96,165,250,0.40);
+  background: linear-gradient(155deg, #f3f7ff 0%, #eaf2ff 62%, #fff 100%);
+  border: 1.5px solid rgba(37,99,235,0.24);
 }
-.content-card--type-checklist.content-card--selected .card-title   { color: #60a5fa; }
-.content-card--type-checklist.content-card--selected .card-summary { color: #93c5fd; }
+.content-card--type-checklist.content-card--selected .card-title   { color: #1d4ed8; }
+.content-card--type-checklist.content-card--selected .card-summary { color: #1e40af; }
 
 .content-card--type-case.content-card--selected {
-  background: linear-gradient(155deg, #0f241c 0%, #10231b 55%, #12201e 100%);
-  border: 1.5px solid rgba(52,211,153,0.38);
+  background: linear-gradient(155deg, #f4fef8 0%, #ebfaf1 62%, #fff 100%);
+  border: 1.5px solid rgba(5,150,105,0.24);
 }
-.content-card--type-case.content-card--selected .card-title   { color: #34d399; }
-.content-card--type-case.content-card--selected .card-summary { color: #6ee7b7; }
+.content-card--type-case.content-card--selected .card-title   { color: #047857; }
+.content-card--type-case.content-card--selected .card-summary { color: #065f46; }
 
-/* AX 트렌드 — 짙은 그라데이션 */
 .content-card--type-ax-trend.content-card--selected {
-  background: linear-gradient(155deg, #1c2540 0%, #192038 55%, #181d30 100%);
-  border: 1.5px solid rgba(148,163,184,0.45);
+  background: linear-gradient(155deg, #fafbfc 0%, #f2f5f8 62%, #fff 100%);
+  border: 1.5px solid rgba(71,85,105,0.26);
 }
-.content-card--type-ax-trend.content-card--selected .card-title   { color: #94a3b8; }
-.content-card--type-ax-trend.content-card--selected .card-summary { color: #cbd5e1; }
+.content-card--type-ax-trend.content-card--selected .card-title   { color: #475569; }
+.content-card--type-ax-trend.content-card--selected .card-summary { color: #334155; }
 
 .card-header { display: flex; align-items: center; gap: 5px; margin-bottom: 9px; }
 
@@ -720,13 +718,13 @@ ol, ul { list-style: none; }
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  background: #1e1a0e;
-  border: 1px solid #3d3212;
+  background: #fffbeb;
+  border: 1px solid #f0d876;
   border-radius: var(--r-sm);
   padding: 6px 9px;
   margin-bottom: 8px;
   font-size: 11.5px;
-  color: #c9a84c;
+  color: #7c5800;
   line-height: 1.5;
   word-break: keep-all;
 }
@@ -736,7 +734,7 @@ ol, ul { list-style: none; }
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.5px;
-  color: #b89040;
+  color: #a16207;
   line-height: 1;
   margin-bottom: 1px;
 }
@@ -769,9 +767,9 @@ ol, ul { list-style: none; }
 .card-footer { margin-top: auto; padding-top: 4px; }
 .card-tags   { display: flex; gap: 4px; flex-wrap: wrap; }
 .tag         { font-size: 11px; padding: 2px 7px; border-radius: var(--r-xs); font-weight: 500; }
-.tag--product  { color: #e4a0c0; background: #2a1520; border: 1px solid #3d2232; }
-.tag--industry { color: #7ab8e8; background: #0e1f35; border: 1px solid #1a2f48; }
-.tag--concern  { color: #b39cf0; background: #1e1735; border: 1px solid #2e2450; }
+.tag--product  { color: #9d174d; background: #fef0f8; border: 1px solid #fce7f3; }
+.tag--industry { color: #0369a1; background: #eff8ff; border: 1px solid #dbeafe; }
+.tag--concern  { color: #5b21b6; background: #f5f3ff; border: 1px solid #ede9fe; }
 
 /* ══════════════════════════════════════════
    Preview Panel
@@ -837,7 +835,7 @@ ol, ul { list-style: none; }
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
-.preview-reset-btn:hover { background: #3d1515; border-color: #6b2020; color: #f87171; }
+.preview-reset-btn:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
 
 /* 선택 콘텐츠 칩 */
 .selected-chips-label {
@@ -895,7 +893,7 @@ ol, ul { list-style: none; }
   margin-left: 2px;
   cursor: pointer;
 }
-.chip-remove:hover { color: #f87171; background: #3d1515; }
+.chip-remove:hover { color: #dc2626; background: #fee2e2; }
 
 .ai-section {
   background: var(--brand-light);
@@ -931,7 +929,7 @@ ol, ul { list-style: none; }
 .format-tab-bar {
   display: flex;
   gap: 3px;
-  background: #191730;
+  background: #e3dff5;
   border-radius: calc(var(--r-md) + 3px);
   padding: 4px;
   flex-shrink: 0;
@@ -945,7 +943,7 @@ ol, ul { list-style: none; }
   padding: 8px 6px;
   font-size: 11.5px;
   font-weight: 600;
-  color: #6b65a8;
+  color: #7a6fab;
   background: transparent;
   border: none;
   border-radius: var(--r-md);
@@ -964,13 +962,13 @@ ol, ul { list-style: none; }
   letter-spacing: -0.2px;
 }
 .format-tab:hover:not(.format-tab--active) {
-  color: var(--brand);
-  background: rgba(157,111,255,0.10);
+  color: var(--brand-dark);
+  background: rgba(255,255,255,0.45);
 }
 .format-tab--active {
-  background: #252248;
+  background: #fff;
   color: var(--brand);
-  box-shadow: 0 1px 6px rgba(157,111,255,0.25), var(--shadow-sm);
+  box-shadow: 0 1px 6px rgba(132,79,249,0.2), var(--shadow-sm);
   font-weight: 700;
 }
 .format-tab--active .format-tab-icon {
