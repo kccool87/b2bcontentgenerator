@@ -81,11 +81,11 @@ body::after {
   content: '';
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  height: 20vh;
+  height: 40vh;
   background: radial-gradient(
     ellipse 85% 100% at 50% 100%,
-    rgba(132, 78, 249, 0.8) 0%,
-    rgba(132, 78, 249, 0.3) 45%,
+    rgba(132, 78, 249, 0.42) 0%,
+    rgba(132, 78, 249, 0.14) 45%,
     transparent 70%
   );
   animation: bg-glow 5s ease-in-out infinite;
