@@ -71,26 +71,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── 상하단 방사형 글로우 애니메이션 ── */
+/* ── 하단 방사형 글로우 애니메이션 ── */
 @keyframes bg-glow {
-  0%, 100% { opacity: 0.45; }
+  0%, 100% { opacity: 0; }
   50%       { opacity: 1; }
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 20vh;
-  background: radial-gradient(
-    ellipse 85% 100% at 50% 0%,
-    rgba(132, 78, 249, 0.8) 0%,
-    rgba(132, 78, 249, 0.3) 45%,
-    transparent 70%
-  );
-  animation: bg-glow 3s ease-in-out infinite;
-  pointer-events: none;
-  z-index: -1;
 }
 
 body::after {
@@ -104,7 +88,7 @@ body::after {
     rgba(132, 78, 249, 0.3) 45%,
     transparent 70%
   );
-  animation: bg-glow 3s ease-in-out infinite;
+  animation: bg-glow 5s ease-in-out infinite;
   pointer-events: none;
   z-index: -1;
 }
