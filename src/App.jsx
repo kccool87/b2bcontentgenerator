@@ -96,6 +96,12 @@ export default function App() {
     if (selectedIds.size === 0) setMobileSheetOpen(false);
   }, [selectedIds]);
 
+  // 시트 열릴 때 배경 스크롤 차단
+  useEffect(() => {
+    document.body.style.overflow = mobileSheetOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileSheetOpen]);
+
   function handleSetQuery(q) {
     setQuery(q);
     setShowAll(!q);
@@ -276,6 +282,7 @@ export default function App() {
                 streamingText={streamingText}
                 relationshipStage={relationshipStage}
                 onRelationshipStageChange={handleRelationshipStageChange}
+                hideSns={true}
               />
             </div>
           </div>

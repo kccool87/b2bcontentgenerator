@@ -173,6 +173,7 @@ export default function PreviewPanel({
   streamingText,
   relationshipStage,
   onRelationshipStageChange,
+  hideSns = false,
 }) {
   const [activeTab, setActiveTab]         = useState('email');
   const [copied, setCopied]               = useState(false);
@@ -409,7 +410,7 @@ export default function PreviewPanel({
         </div>
       </div>
 
-      <SnsBar />
+      {!hideSns && <SnsBar />}
     </div>
   );
 }
