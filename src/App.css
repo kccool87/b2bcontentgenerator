@@ -1262,47 +1262,52 @@ ol, ul { list-style: none; }
 .copy-single-btn--done { background: #10b981 !important; box-shadow: 0 2px 8px rgba(16,185,129,0.35) !important; }
 
 /* ══════════════════════════════════════════
-   관계 단계 선택 (PreviewPanel)
+   관계 단계 선택 (PreviewPanel) — 세그먼트 컨트롤
    ══════════════════════════════════════════ */
 .relationship-stage-row {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
   flex-shrink: 0;
 }
 .relationship-stage-label {
   font-size: 11px;
-  font-weight: 600;
-  color: var(--text-4);
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.3px;
 }
 .relationship-stage-btns {
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  gap: 3px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 3px;
 }
 .stage-btn {
-  padding: 4px 11px;
-  font-size: 11px;
+  flex: 1;
+  padding: 8px 6px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--text-3);
-  background: var(--bg-muted);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-xl);
+  color: var(--text-2);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--r-md) - 2px);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
   white-space: nowrap;
+  text-align: center;
+  transition: background 0.14s, color 0.14s, box-shadow 0.14s;
+  line-height: 1.3;
 }
 .stage-btn:hover:not(.stage-btn--active) {
-  border-color: var(--brand);
   color: var(--brand);
-  background: var(--brand-light);
+  background: rgba(255,255,255,0.55);
 }
 .stage-btn--active {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: #fff;
+  background: #fff;
+  color: var(--brand);
+  font-weight: 700;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
 }
 
 /* ══════════════════════════════════════════
