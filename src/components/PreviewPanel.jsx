@@ -258,20 +258,6 @@ export default function PreviewPanel({
 
   return (
     <div className="preview-panel">
-      <div className="preview-title-row">
-        <h2 className="preview-title">
-          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="preview-title-icon" aria-hidden="true">
-            <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2H6l-4 3V5z" fill="currentColor"/>
-          </svg>
-          고객 제안 문구 미리보기
-        </h2>
-        {!isEmpty && (
-          <button className="preview-reset-btn" onClick={onDeselect} title="선택된 콘텐츠 모두 해제">
-            선택해제
-          </button>
-        )}
-      </div>
-
       {/* 고객 관계 단계 — 항상 표시 */}
       <div className="relationship-stage-row">
         <span className="relationship-stage-label">고객 관계</span>
@@ -291,7 +277,12 @@ export default function PreviewPanel({
       {/* 선택된 콘텐츠 칩 */}
       {!isEmpty && (
         <>
-          <p className="selected-chips-label">선택된 콘텐츠 ({selectedContents.length}개)</p>
+          <div className="selected-chips-header">
+            <p className="selected-chips-label">선택된 콘텐츠 ({selectedContents.length}개)</p>
+            <button className="preview-reset-btn" onClick={onDeselect} title="선택된 콘텐츠 모두 해제">
+              선택 해제
+            </button>
+          </div>
           <div className="selected-chips-wrap">
             {selectedContents.map((item, i) => (
               <span key={item.id} className="selected-chip" title={ct(item.title)}>
