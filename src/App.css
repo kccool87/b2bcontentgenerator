@@ -1375,115 +1375,85 @@ ol, ul { list-style: none; }
 }
 
 /* ══════════════════════════════════════════
-   액션 버튼 그리드 2×2 (AI재생성·복사 / 이메일·카카오톡)
+   액션 버튼 그리드 2×2 (B2B 컴팩트 스타일)
    ══════════════════════════════════════════ */
 .action-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 13px;
-  border-radius: 13px;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.14s, box-shadow 0.14s;
-}
-.action-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.07);
-}
-.action-btn:active:not(:disabled) {
-  transform: translateY(0) scale(0.98);
-  filter: brightness(0.94);
-  transition: transform 0.07s, filter 0.07s;
-}
-.action-btn:disabled {
-  opacity: 0.38;
-  cursor: not-allowed;
-  transform: none;
-  filter: none;
-  animation: none !important;
-  box-shadow: none !important;
-}
-.action-btn:disabled::after { display: none; }
-
-/* 아이콘 배지 */
-.action-btn-icon {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 17px;
-  border-radius: 9px;
-  background: rgba(255,255,255,0.16);
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-/* 텍스트 라벨 */
-.action-btn-label {
+  gap: 5px;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
   font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: -0.1px;
-  flex: 1;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1.5px solid transparent;
+  letter-spacing: 0.1px;
+  line-height: 1.3;
+  transition: background 0.14s, border-color 0.14s, transform 0.11s, box-shadow 0.14s;
 }
+.action-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.action-btn:active:not(:disabled) { transform: translateY(0); }
+.action-btn:disabled { opacity: 0.42; cursor: not-allowed; transform: none; }
 
-/* AI 재생성 — 보라 그라디언트 + 글로우 */
+/* AI 재생성 — 브랜드 단색 (절제된 프라이머리) */
 .action-btn--regen {
-  background: linear-gradient(135deg, #6b38e8 0%, #9c5cf5 55%, #c084fc 100%);
+  background: var(--brand);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(132,79,249,0.42);
-  animation: ai-glow 2.6s ease-in-out infinite;
+  box-shadow: 0 1px 5px rgba(132,79,249,0.28);
 }
-.action-btn--regen::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  width: 42%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent);
-  animation: ai-sweep 2.8s ease-in-out infinite;
-  pointer-events: none;
+.action-btn--regen:hover:not(:disabled) {
+  background: var(--brand-dark);
+  box-shadow: 0 2px 8px rgba(132,79,249,0.38);
 }
-.action-btn--loading { animation: none !important; }
-.action-btn--loading::after { display: none; }
+.action-btn--loading { opacity: 0.72 !important; }
 
-/* 문구 복사 — 다크 네이비 */
+/* 문구 복사 — 아웃라인 */
 .action-btn--copy {
-  background: #0f172a;
-  color: #e2e8f0;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.28);
+  background: var(--bg-card);
+  color: var(--text-2);
+  border-color: var(--border);
+  box-shadow: var(--shadow-xs);
+}
+.action-btn--copy:hover:not(:disabled) {
+  border-color: #b5b3aa;
+  background: var(--bg-muted);
 }
 .action-btn--copy-done {
-  background: #064e3b !important;
-  box-shadow: 0 3px 10px rgba(6,78,59,0.32) !important;
+  background: #ecfdf5 !important;
+  border-color: #6ee7b7 !important;
+  color: #065f46 !important;
+  box-shadow: none !important;
 }
-.action-btn--copy-done .action-btn-icon { background: rgba(16,185,129,0.28); }
 
-/* 이메일 발송 — 블루 */
+/* 이메일 발송 — 아웃라인, hover 시 블루 틴트 */
 .action-btn--email {
-  background: #1d4ed8;
-  color: #fff;
-  box-shadow: 0 3px 12px rgba(29,78,216,0.38);
+  background: var(--bg-card);
+  color: var(--text-2);
+  border-color: var(--border);
+  box-shadow: var(--shadow-xs);
+}
+.action-btn--email:hover:not(:disabled) {
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
-/* 카카오톡 발송 — 브랜드 옐로우 */
+/* 카카오톡 — 브랜드 옐로우 유지 */
 .action-btn--kakao {
   background: #FEE500;
-  color: #1a1200;
-  box-shadow: 0 3px 12px rgba(254,229,0,0.42);
+  color: #191600;
+  box-shadow: 0 1px 4px rgba(254,229,0,0.38);
 }
-.action-btn--kakao .action-btn-icon { background: rgba(0,0,0,0.09); }
-.action-btn--kakao-done { background: #e6cc00 !important; }
+.action-btn--kakao:hover:not(:disabled) { background: #f5dc00; }
+.action-btn--kakao-done { background: #e6cc00 !important; font-size: 11px; }
 
 /* ══════════════════════════════════════════
    Responsive — 768px

@@ -375,12 +375,9 @@ export default function PreviewPanel({
             disabled={isLoading || isEmpty}
             title="현재 관계 단계 설정으로 AI 문구를 새로 생성합니다"
           >
-            <span className="action-btn-icon">
-              {isLoading ? <span className="ai-regen-spinner" /> : '✦'}
-            </span>
-            <span className="action-btn-label">
-              {isLoading ? '생성 중...' : 'AI 문구 다시 생성'}
-            </span>
+            {isLoading
+              ? <><span className="ai-regen-spinner" />생성 중</>
+              : <>✦ AI 문구 재생성</>}
           </button>
 
           <button
@@ -388,8 +385,7 @@ export default function PreviewPanel({
             onClick={handleCopy}
             disabled={isLoading || isEmpty}
           >
-            <span className="action-btn-icon">{copied ? '✓' : '📋'}</span>
-            <span className="action-btn-label">{copied ? '복사 완료!' : '문구 복사하기'}</span>
+            {copied ? '✓ 복사 완료' : '문구 복사하기'}
           </button>
 
           {/* 행 2: 이메일 + 카카오톡 */}
@@ -399,8 +395,7 @@ export default function PreviewPanel({
             disabled={isLoading || isEmpty}
             title="이메일 문구를 기본 메일 앱으로 보냅니다"
           >
-            <span className="action-btn-icon">✉</span>
-            <span className="action-btn-label">이메일 발송하기</span>
+            ✉ 이메일 발송
           </button>
 
           <button
@@ -409,10 +404,7 @@ export default function PreviewPanel({
             disabled={isLoading || isEmpty}
             title="메신저 문구를 복사하고 카카오톡을 엽니다"
           >
-            <span className="action-btn-icon">💬</span>
-            <span className="action-btn-label">
-              {kakaoShared ? '붙여넣기 하세요' : '카카오톡 발송하기'}
-            </span>
+            {kakaoShared ? '붙여넣기 하세요' : '💬 카카오톡'}
           </button>
         </div>
       </div>
