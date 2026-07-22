@@ -404,7 +404,7 @@ export default function PreviewPanel({
             disabled={isLoading || isEmpty}
             title="메신저 문구를 복사하고 카카오톡을 엽니다"
           >
-            {kakaoShared ? '붙여넣기 하세요' : '💬 카카오톡'}
+            {kakaoShared ? '붙여넣기 하세요' : '💬 카카오톡 발송'}
           </button>
         </div>
       </div>
