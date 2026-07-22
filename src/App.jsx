@@ -13,6 +13,7 @@ import algoLogo from './assets/algo_logo.png';
 import SearchPanel from './components/SearchPanel';
 import ResultCards from './components/ResultCards';
 import PreviewPanel from './components/PreviewPanel';
+import BackgroundNetwork from './components/BackgroundNetwork';
 import { useSearch } from './hooks/useSearch';
 import { useGemini } from './hooks/useGemini';
 import { contentData } from './data/contentData';
@@ -174,6 +175,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <BackgroundNetwork />
       <div className="app-container">
         <div className="page-title-area">
           <div className="app-title">
