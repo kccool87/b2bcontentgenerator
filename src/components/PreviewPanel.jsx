@@ -3,33 +3,112 @@ import { useState, useEffect } from 'react';
 const NUMS = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
 function num(i) { return NUMS[i] ?? String(i + 1); }
 
-// ── 인사말 풀 ──────────────────────────────────────────────────────
-const EMAIL_GREETINGS = [
-  '안녕하세요. 지난번에 말씀 나눴던 LG유플러스 OOO입니다.',
-  '안녕하세요. 한번 인사 드렸던 LG유플러스 영업담당 OOO입니다.',
-  '안녕하세요. 말씀 나눠주셔서 늘 감사드립니다. LG유플러스 기업고객 담당 OOO입니다.',
-  '안녕하세요. 평소 관심 가져주셔서 항상 감사드립니다. LG유플러스 OOO입니다.',
-  '안녕하세요. 지난번 대화 이후 꼭 한번 더 연락드리고 싶었습니다. LG유플러스 OOO입니다.',
-  '안녕하세요. 좋은 인연으로 다시 연락드리게 됩니다. LG유플러스 기업솔루션팀 OOO입니다.',
-];
+// ── 관계 단계 → 풀 키 변환 ───────────────────────────────────────────
+function stageKey(stage) {
+  if (stage === '기존 거래처') return 'EXISTING';
+  if (stage === '재구매 검토') return 'REPURCHASE';
+  return 'EARLY';
+}
 
-const MESSENGER_GREETINGS = [
-  '안녕하세요? LG유플러스 OOO 담당자입니다.',
-  '안녕하세요! LG유플러스 OOO입니다.',
-  '안녕하세요? 잘 지내고 계신가요? LG유플러스 OOO입니다.',
-  '안녕하세요! 오늘도 좋은 하루 되세요. LG유플러스 OOO입니다.',
-  '안녕하세요? 고객님, LG유플러스 OOO 담당입니다.',
-  '안녕하세요! LG유플러스 OOO 담당자입니다, 연락드려요.',
-];
+// ── 인사말 풀 (관계 단계별 8개) ─────────────────────────────────────
+const EMAIL_GREETINGS = {
+  EARLY: [
+    '안녕하세요. 지난번 짧게 인사드렸던 LG유플러스 OOO입니다.',
+    '안녕하세요. 얼마 전 연락드렸던 LG유플러스 기업고객 담당 OOO입니다.',
+    '안녕하세요. 지난 미팅에서 잠시 뵈었던 LG유플러스 OOO입니다.',
+    '안녕하세요. 얼마 전 짧게 말씀 나눴던 LG유플러스 OOO입니다.',
+    '안녕하세요. 지난번 연락드렸던 LG유플러스 기업솔루션팀 OOO입니다.',
+    '안녕하세요. 잠시 인사드렸던 LG유플러스 OOO입니다. 다시 연락드립니다.',
+    '안녕하세요. 지난번 짧은 통화로 인사드렸던 LG유플러스 OOO입니다.',
+    '안녕하세요. 얼마 전 뵀던 LG유플러스 기업고객 담당 OOO입니다.',
+  ],
+  EXISTING: [
+    '안녕하세요. 지난번에 말씀 나눴던 LG유플러스 OOO입니다.',
+    '안녕하세요. 한번 인사 드렸던 LG유플러스 영업담당 OOO입니다.',
+    '안녕하세요. 말씀 나눠주셔서 늘 감사드립니다. LG유플러스 기업고객 담당 OOO입니다.',
+    '안녕하세요. 평소 관심 가져주셔서 항상 감사드립니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 지난번 대화 이후 꼭 한번 더 연락드리고 싶었습니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 좋은 인연으로 다시 연락드리게 됩니다. LG유플러스 기업솔루션팀 OOO입니다.',
+    '안녕하세요. 그간 잘 지내셨는지요. LG유플러스 OOO입니다.',
+    '안녕하세요. 늘 편하게 대해주셔서 감사드립니다. LG유플러스 OOO입니다.',
+  ],
+  REPURCHASE: [
+    '안녕하세요. 늘 이용해 주셔서 감사합니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 현재 서비스 이용 중이신 담당자님께 안내드립니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 항상 좋은 파트너가 되어주셔서 감사드립니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 그동안 함께해 주셔서 감사합니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 꾸준히 이용해 주고 계신 점 늘 감사드립니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 오랜 기간 함께해 주셔서 진심으로 감사드립니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 늘 좋은 관계 이어가 주셔서 감사합니다. LG유플러스 OOO입니다.',
+    '안녕하세요. 지속적인 이용에 감사드리며 연락드립니다. LG유플러스 OOO입니다.',
+  ],
+};
 
-const EMAIL_CLOSINGS = [
-  '앞으로도 도움이 될 자료가 있으면 먼저 챙겨드리겠습니다. 감사합니다.\n-LG유플러스 OOO 드림-',
-  '다음에도 좋은 자료가 생기면 공유드리겠습니다. 좋은 하루 되세요.\n-LG유플러스 OOO 드림-',
-  '언제든 편하게 연락 주시면 바로 도와드리겠습니다. 늘 감사드립니다.\n-LG유플러스 OOO 드림-',
-  '좋은 인연 계속 이어가길 바랍니다. 항상 감사드립니다.\n-LG유플러스 OOO 드림-',
-  '앞으로도 유익한 내용 있으면 먼저 연락드리겠습니다. 좋은 하루 되세요.\n-LG유플러스 OOO 드림-',
-  '앞으로도 지속적으로 좋은 정보 나누며 함께하겠습니다. 감사합니다.\n-LG유플러스 OOO 드림-',
-];
+const MESSENGER_GREETINGS = {
+  EARLY: [
+    '안녕하세요! 지난번 짧게 인사드렸던 LG유플러스 OOO입니다 😊',
+    '안녕하세요~ 얼마 전 연락드렸던 LG유플러스 OOO예요.',
+    '안녕하세요! 지난 미팅에서 뵈었던 LG유플러스 OOO입니다.',
+    '안녕하세요. 얼마 전 말씀 나눴던 LG유플러스 OOO예요 🙂',
+    '안녕하세요~ 지난번 연락드렸던 LG유플러스 기업솔루션팀 OOO입니다!',
+    '안녕하세요! 잠시 인사드렸던 LG유플러스 OOO입니다. 다시 연락드려요.',
+    '안녕하세요. 지난번 통화로 인사드렸던 LG유플러스 OOO입니다 😄',
+    '안녕하세요~ 얼마 전 뵀던 LG유플러스 기업고객 담당 OOO예요.',
+  ],
+  EXISTING: [
+    '안녕하세요! 지난번에 말씀 나눴던 LG유플러스 OOO입니다 😊',
+    '안녕하세요~ 한번 인사드렸던 LG유플러스 OOO예요!',
+    '안녕하세요! 늘 좋게 봐주셔서 감사해요. LG유플러스 OOO입니다.',
+    '안녕하세요 😊 평소 관심 가져주셔서 항상 감사드립니다. LG유플러스 OOO예요.',
+    '안녕하세요! 지난 대화 이후 꼭 다시 연락드리고 싶었어요. LG유플러스 OOO입니다.',
+    '안녕하세요~ 좋은 인연으로 다시 연락드려요. LG유플러스 기업솔루션팀 OOO입니다!',
+    '안녕하세요! 그간 잘 지내셨나요? LG유플러스 OOO예요 🙂',
+    '안녕하세요~ 늘 편하게 대해주셔서 감사해요! LG유플러스 OOO입니다.',
+  ],
+  REPURCHASE: [
+    '안녕하세요! 늘 이용해 주셔서 감사합니다 😊 LG유플러스 OOO입니다.',
+    '안녕하세요~ 현재 서비스 이용 중이신 담당자님께 연락드려요. LG유플러스 OOO입니다!',
+    '안녕하세요! 항상 좋은 파트너가 되어주셔서 감사해요. LG유플러스 OOO입니다.',
+    '안녕하세요 😊 그동안 함께해 주셔서 감사드립니다. LG유플러스 OOO예요.',
+    '안녕하세요~ 꾸준히 이용해 주셔서 늘 감사드려요! LG유플러스 OOO입니다.',
+    '안녕하세요! 오랜 기간 함께해 주셔서 진심으로 감사합니다 🙏 LG유플러스 OOO예요.',
+    '안녕하세요~ 늘 좋은 관계 이어가 주셔서 감사해요. LG유플러스 OOO입니다!',
+    '안녕하세요! 지속적인 이용에 감사드립니다. LG유플러스 OOO입니다 😊',
+  ],
+};
+
+const EMAIL_CLOSINGS = {
+  EARLY: [
+    '필요하신 내용이 있으시면 언제든지 편하게 연락 주세요.\n-LG유플러스 OOO 드림-',
+    '추가로 궁금하신 점이 있으시면 말씀해 주세요. 성실히 안내드리겠습니다.\n-LG유플러스 OOO 드림-',
+    '부담 없이 연락 주시면 상세히 안내드리겠습니다.\n-LG유플러스 OOO 드림-',
+    '관심 있으신 부분이 있으시면 편하게 말씀해 주세요.\n-LG유플러스 OOO 드림-',
+    '추가 문의나 미팅이 필요하시면 연락 주시면 바로 찾아뵙겠습니다.\n-LG유플러스 OOO 드림-',
+    '언제든 편한 시간에 연락 주시면 찾아뵙겠습니다. 감사합니다.\n-LG유플러스 OOO 드림-',
+    '더 궁금하신 점이 있으시면 연락 주세요. 성심껏 도와드리겠습니다.\n-LG유플러스 OOO 드림-',
+    '편하신 시간에 연락 주시면 자세히 안내드리겠습니다. 감사합니다.\n-LG유플러스 OOO 드림-',
+  ],
+  EXISTING: [
+    '추가로 확인하고 싶으신 사항이 있으시면 말씀해 주세요.\n-LG유플러스 OOO 드림-',
+    '궁금한 점이 있으시면 언제든지 편하게 말씀해 주세요.\n-LG유플러스 OOO 드림-',
+    '다음에 더 좋은 제안으로 찾아뵐 수 있도록 노력하겠습니다.\n-LG유플러스 OOO 드림-',
+    '항상 도움이 될 수 있는 파트너가 되겠습니다.\n-LG유플러스 OOO 드림-',
+    '필요하신 부분 있으시면 편하게 연락 주세요. 늘 함께하겠습니다.\n-LG유플러스 OOO 드림-',
+    '다음번에도 좋은 소식 가지고 연락드리겠습니다. 감사합니다.\n-LG유플러스 OOO 드림-',
+    '혹시 미팅이 가능하시다면 일정 잡아 직접 찾아뵙겠습니다.\n-LG유플러스 OOO 드림-',
+    '언제든 필요하신 부분에 맞춰 지원드리겠습니다. 잘 부탁드립니다.\n-LG유플러스 OOO 드림-',
+  ],
+  REPURCHASE: [
+    '앞으로도 좋은 파트너로 계속 함께하겠습니다. 감사합니다.\n-LG유플러스 OOO 드림-',
+    '언제든지 필요하신 부분은 말씀만 해 주세요. 항상 최선을 다하겠습니다.\n-LG유플러스 OOO 드림-',
+    '지속적인 신뢰와 이용에 진심으로 감사드립니다. 더 좋은 서비스로 보답하겠습니다.\n-LG유플러스 OOO 드림-',
+    '앞으로도 든든한 파트너로 곁에 있겠습니다. 감사합니다.\n-LG유플러스 OOO 드림-',
+    '더 좋은 가치를 드릴 수 있도록 계속해서 노력하겠습니다.\n-LG유플러스 OOO 드림-',
+    '오래도록 함께할 수 있도록 최선을 다하겠습니다. 항상 감사드립니다.\n-LG유플러스 OOO 드림-',
+    '장기적인 협력 관계를 위해 늘 최선을 다해 지원드리겠습니다.\n-LG유플러스 OOO 드림-',
+    '앞으로도 변함없이 함께해 주시기 바랍니다. 진심으로 감사드립니다.\n-LG유플러스 OOO 드림-',
+  ],
+};
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -42,7 +121,7 @@ const LOADING_PHASES = [
 
 // ── 관계 단계 정의 ───────────────────────────────────────────────
 const RELATIONSHIP_STAGES = [
-  { value: '초면',       label: '초면(콜드)' },
+  { value: '초기 관계',   label: '초기 관계' },
   { value: '기존 거래처', label: '기존 거래처' },
   { value: '재구매 검토', label: '재구매 검토' },
 ];
@@ -179,9 +258,9 @@ export default function PreviewPanel({
   const [copied, setCopied]               = useState(false);
   const [kakaoShared, setKakaoShared]     = useState(false);
   const [phaseIdx, setPhaseIdx]           = useState(0);
-  const [emailGreeting, setEmailGreeting] = useState(() => pick(EMAIL_GREETINGS));
-  const [msgGreeting,   setMsgGreeting]   = useState(() => pick(MESSENGER_GREETINGS));
-  const [emailClosing,  setEmailClosing]  = useState(() => pick(EMAIL_CLOSINGS));
+  const [emailGreeting, setEmailGreeting] = useState(() => pick(EMAIL_GREETINGS[stageKey(relationshipStage)]));
+  const [msgGreeting,   setMsgGreeting]   = useState(() => pick(MESSENGER_GREETINGS[stageKey(relationshipStage)]));
+  const [emailClosing,  setEmailClosing]  = useState(() => pick(EMAIL_CLOSINGS[stageKey(relationshipStage)]));
 
   // 전체 편집 가능 텍스트 state
   const [fullEmailText,     setFullEmailText]     = useState('');
@@ -198,14 +277,15 @@ export default function PreviewPanel({
     return () => clearInterval(id);
   }, [isLoading]);
 
-  // 콘텐츠 수 변경 시 인사말·맺음말 재추첨
+  // 콘텐츠 수 또는 관계 단계 변경 시 인사말·맺음말 재추첨
   useEffect(() => {
     if (!isEmpty) {
-      setEmailGreeting(pick(EMAIL_GREETINGS));
-      setMsgGreeting(pick(MESSENGER_GREETINGS));
-      setEmailClosing(pick(EMAIL_CLOSINGS));
+      const key = stageKey(relationshipStage);
+      setEmailGreeting(pick(EMAIL_GREETINGS[key]));
+      setMsgGreeting(pick(MESSENGER_GREETINGS[key]));
+      setEmailClosing(pick(EMAIL_CLOSINGS[key]));
     }
-  }, [selectedContents?.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedContents?.length, relationshipStage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // AI 응답 or 인사말 변경 → 전체 텍스트 재조립 (유저 수정 초기화)
   useEffect(() => {

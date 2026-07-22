@@ -32,7 +32,7 @@ export default function App() {
   const [showAll, setShowAll]   = useState(true);
   const [selectedIds, setSelectedIds]           = useState(new Set());
   const [shuffleSeed, setShuffleSeed]           = useState(0);
-  const [relationshipStage, setRelationshipStage] = useState('초면');
+  const [relationshipStage, setRelationshipStage] = useState('초기 관계');
 
   const isMobile          = useIsMobile();
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
