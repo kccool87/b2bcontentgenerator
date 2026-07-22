@@ -1375,86 +1375,115 @@ ol, ul { list-style: none; }
 }
 
 /* ══════════════════════════════════════════
-   액션 버튼 그리드 (AI 재생성 + 복사 + 카카오 + 이메일)
+   액션 버튼 그리드 2×2 (AI재생성·복사 / 이메일·카카오톡)
    ══════════════════════════════════════════ */
 .action-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .action-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 10px 8px;
-  border-radius: var(--r-md);
-  font-size: 12px;
-  font-weight: 700;
+  gap: 10px;
+  padding: 12px 13px;
+  border-radius: 13px;
   border: none;
-  white-space: nowrap;
   cursor: pointer;
-  transition: transform 0.12s, filter 0.15s, box-shadow 0.15s, background 0.15s;
-  line-height: 1.2;
-}
-.action-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.06); }
-.action-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.96); }
-.action-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; filter: none; }
-
-/* AI 다시 생성 — 전체 너비, 보라색 그라디언트 */
-.action-btn--regen {
-  grid-column: 1 / -1;
+  text-align: left;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(130deg, #6b38e8 0%, #844ff9 55%, #a370ff 100%);
+  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.14s, box-shadow 0.14s;
+}
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+}
+.action-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.94);
+  transition: transform 0.07s, filter 0.07s;
+}
+.action-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+  animation: none !important;
+  box-shadow: none !important;
+}
+.action-btn:disabled::after { display: none; }
+
+/* 아이콘 배지 */
+.action-btn-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.16);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* 텍스트 라벨 */
+.action-btn-label {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.1px;
+  flex: 1;
+}
+
+/* AI 재생성 — 보라 그라디언트 + 글로우 */
+.action-btn--regen {
+  background: linear-gradient(135deg, #6b38e8 0%, #9c5cf5 55%, #c084fc 100%);
   color: #fff;
-  border: 1.5px solid rgba(255,255,255,0.16);
-  letter-spacing: 0.2px;
+  box-shadow: 0 4px 16px rgba(132,79,249,0.42);
   animation: ai-glow 2.6s ease-in-out infinite;
 }
 .action-btn--regen::after {
   content: '';
   position: absolute;
   inset: 0;
-  width: 38%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+  width: 42%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent);
   animation: ai-sweep 2.8s ease-in-out infinite;
   pointer-events: none;
 }
-.action-btn--regen:disabled {
-  background: var(--text-4);
-  border-color: transparent;
-  animation: none;
-  box-shadow: none;
-}
-.action-btn--regen:disabled::after { display: none; }
-.action-btn--loading { opacity: 0.75 !important; }
+.action-btn--loading { animation: none !important; }
+.action-btn--loading::after { display: none; }
 
-/* 복사 — 짙은 슬레이트 */
+/* 문구 복사 — 다크 네이비 */
 .action-btn--copy {
-  background: #4b5563;
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  background: #0f172a;
+  color: #e2e8f0;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.28);
 }
-.action-btn--copy-done { background: #10b981 !important; box-shadow: 0 2px 8px rgba(16,185,129,0.35) !important; }
+.action-btn--copy-done {
+  background: #064e3b !important;
+  box-shadow: 0 3px 10px rgba(6,78,59,0.32) !important;
+}
+.action-btn--copy-done .action-btn-icon { background: rgba(16,185,129,0.28); }
 
-/* 카카오톡 — 브랜드 옐로우 */
+/* 이메일 발송 — 블루 */
+.action-btn--email {
+  background: #1d4ed8;
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(29,78,216,0.38);
+}
+
+/* 카카오톡 발송 — 브랜드 옐로우 */
 .action-btn--kakao {
   background: #FEE500;
-  color: #191600;
-  box-shadow: 0 2px 6px rgba(254,229,0,0.35);
+  color: #1a1200;
+  box-shadow: 0 3px 12px rgba(254,229,0,0.42);
 }
-.action-btn--kakao-done { background: #e6cc00 !important; font-size: 10.5px; }
-
-/* 이메일 — 슬레이트 (복사와 동일 계열) */
-.action-btn--email {
-  background: #4b5563;
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  opacity: 0.88;
-}
-.action-btn--email:hover:not(:disabled) { opacity: 1; }
+.action-btn--kakao .action-btn-icon { background: rgba(0,0,0,0.09); }
+.action-btn--kakao-done { background: #e6cc00 !important; }
 
 /* ══════════════════════════════════════════
    Responsive — 768px

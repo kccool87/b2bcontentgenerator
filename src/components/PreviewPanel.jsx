@@ -368,43 +368,51 @@ export default function PreviewPanel({
           )}
         </div>
         <div className="action-grid">
-          {/* AI 다시 생성 — 전체 너비 */}
+          {/* 행 1: AI 재생성 + 문구 복사 */}
           <button
             className={`action-btn action-btn--regen${isLoading ? ' action-btn--loading' : ''}`}
             onClick={onGenerateAI}
             disabled={isLoading || isEmpty}
             title="현재 관계 단계 설정으로 AI 문구를 새로 생성합니다"
           >
-            {isLoading ? (
-              <><span className="ai-regen-spinner" />생성 중</>
-            ) : (
-              <><span className="ai-regen-icon">✦</span>AI 문구 다시 생성</>
-            )}
+            <span className="action-btn-icon">
+              {isLoading ? <span className="ai-regen-spinner" /> : '✦'}
+            </span>
+            <span className="action-btn-label">
+              {isLoading ? '생성 중...' : 'AI 문구 다시 생성'}
+            </span>
           </button>
 
-          {/* 2행: 복사 + 카카오 + 이메일 */}
           <button
             className={`action-btn action-btn--copy${copied ? ' action-btn--copy-done' : ''}`}
             onClick={handleCopy}
             disabled={isLoading || isEmpty}
           >
-            {copied ? '✓ 복사 완료' : '📋 문구 복사'}
+            <span className="action-btn-icon">{copied ? '✓' : '📋'}</span>
+            <span className="action-btn-label">{copied ? '복사 완료!' : '문구 복사하기'}</span>
           </button>
-          <button
-            className={`action-btn action-btn--kakao${kakaoShared ? ' action-btn--kakao-done' : ''}`}
-            onClick={handleKakaoShare}
-            disabled={isLoading || isEmpty}
-            title="메신저 문구를 복사하고 카카오톡을 엽니다"
-          >
-            {kakaoShared ? '붙여넣기 하세요' : '💬 카카오톡'}
-          </button>
+
+          {/* 행 2: 이메일 + 카카오톡 */}
           <button
             className="action-btn action-btn--email"
             onClick={handleMailTo}
             disabled={isLoading || isEmpty}
             title="이메일 문구를 기본 메일 앱으로 보냅니다"
           >
-            ✉ 이메일
+            <span className="action-btn-icon">✉</span>
+            <span className="action-btn-label">이메일 발송하기</span>
+          </button>
+
+          <button
+            className={`action-btn action-btn--kakao${kakaoShared ? ' action-btn--kakao-done' : ''}`}
+            onClick={handleKakaoShare}
+            disabled={isLoading || isEmpty}
+            title="메신저 문구를 복사하고 카카오톡을 엽니다"
+          >
+            <span className="action-btn-icon">💬</span>
+            <span className="action-btn-label">
+              {kakaoShared ? '붙여넣기 하세요' : '카카오톡 발송하기'}
+            </span>
           </button>
         </div>
       </div>
