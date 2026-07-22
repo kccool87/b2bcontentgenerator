@@ -71,57 +71,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── 하단 Aurora 글로우 — 2레이어 페이즈 오프셋 ── */
+/* ── 하단 Aurora 글로우 — .app pseudo-element (z-index 정상 작동) ── */
 @keyframes glow-a {
-  0%, 100% { opacity: 0;    transform: scale(1); }
-  20%       { opacity: 0.5; }
-  50%       { opacity: 1;    transform: scale(1.07); }
-  80%       { opacity: 0.45; }
+  0%, 100% { opacity: 0;    transform: scale(0.95); }
+  50%       { opacity: 1;    transform: scale(1.08); }
 }
 
 @keyframes glow-b {
-  0%        { opacity: 0;    transform: translateX(-5%) scale(0.9); }
-  25%       { opacity: 0.7; }
-  50%       { opacity: 1;    transform: translateX(5%)  scale(1.03); }
-  75%       { opacity: 0.55; }
-  100%      { opacity: 0;    transform: translateX(-5%) scale(0.9); }
-}
-
-/* 레이어 A — 넓은 메인 글로우 */
-body::after {
-  content: '';
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 42vh;
-  transform-origin: bottom center;
-  background: radial-gradient(
-    ellipse 90% 100% at 50% 100%,
-    rgba(132, 78, 249, 0.38) 0%,
-    rgba(132, 78, 249, 0.12) 48%,
-    transparent 70%
-  );
-  animation: glow-a 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* 레이어 B — 좁고 밝은 코어 글로우, 좌우 드리프트 + 2.5s 위상 차 */
-body::before {
-  content: '';
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 30vh;
-  transform-origin: bottom center;
-  background: radial-gradient(
-    ellipse 55% 100% at 50% 100%,
-    rgba(168, 85, 247, 0.45) 0%,
-    rgba(110, 60, 230, 0.12) 50%,
-    transparent 72%
-  );
-  animation: glow-b 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  animation-delay: -2.5s;
-  pointer-events: none;
-  z-index: -1;
+  0%   { opacity: 0;   transform: translateX(-7%) scale(0.88); }
+  50%  { opacity: 1;   transform: translateX(7%)  scale(1.05); }
+  100% { opacity: 0;   transform: translateX(-7%) scale(0.88); }
 }
 
 button { cursor: pointer; border: none; background: none; font-family: inherit; font-size: inherit; }
@@ -136,13 +95,53 @@ ol, ul { list-style: none; }
    App Shell
    ══════════════════════════════════════════ */
 .app {
+  position: relative;
   height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+/* 레이어 A — 넓은 메인 글로우 */
+.app::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 44vh;
+  transform-origin: bottom center;
+  background: radial-gradient(
+    ellipse 90% 100% at 50% 100%,
+    rgba(132, 78, 249, 0.55) 0%,
+    rgba(132, 78, 249, 0.18) 48%,
+    transparent 70%
+  );
+  animation: glow-a 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 레이어 B — 좁은 코어 글로우, 좌우 드리프트 + 2.5s 위상 차 */
+.app::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 32vh;
+  transform-origin: bottom center;
+  background: radial-gradient(
+    ellipse 52% 100% at 50% 100%,
+    rgba(168, 85, 247, 0.65) 0%,
+    rgba(110, 60, 230, 0.18) 50%,
+    transparent 72%
+  );
+  animation: glow-b 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-delay: -2.5s;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .app-container {
+  position: relative;
+  z-index: 1;
   max-width: var(--page-max);
   width: 100%;
   margin: 0 auto;
@@ -364,6 +363,9 @@ ol, ul { list-style: none; }
   align-items: center;
   margin-top: 4px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  background: var(--bg-page);
 }
 
 .sort-btn {
@@ -494,6 +496,9 @@ ol, ul { list-style: none; }
   -webkit-overflow-scrolling: touch;
   padding-top: 3px;
   margin-top: -3px;
+  position: relative;
+  z-index: 2;
+  background: var(--bg-page);
 }
 .type-filter-bar::-webkit-scrollbar { display: none; }
 .type-filter-tabs { display: contents; }
