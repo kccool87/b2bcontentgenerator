@@ -1,4 +1,14 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+
+function useIsMobile(bp = 768) {
+  const [v, setV] = useState(() => typeof window !== 'undefined' && window.innerWidth <= bp);
+  useEffect(() => {
+    const h = () => setV(window.innerWidth <= bp);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, [bp]);
+  return v;
+}
 import algoLogo from './assets/algo_logo.png';
 import SearchPanel from './components/SearchPanel';
 import ResultCards from './components/ResultCards';
@@ -23,6 +33,12 @@ export default function App() {
   const [selectedIds, setSelectedIds]           = useState(new Set());
   const [shuffleSeed, setShuffleSeed]           = useState(0);
   const [relationshipStage, setRelationshipStage] = useState('초면');
+
+  const isMobile   = useIsMobile();
+  const previewRef = useRef(null);
+  const scrollToPreview = useCallback(() => {
+    previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const { results, allResults, total, isEmpty } = useSearch({ query });
   const { message: geminiMessage, isLoading, streamingText, generate, reset: resetGemini } = useGemini();
@@ -174,7 +190,7 @@ export default function App() {
             />
           </section>
 
-          <aside className="right-panel">
+          <aside className="right-panel" ref={previewRef}>
             <PreviewPanel
               selectedContents={selectedContents}
               geminiMessage={geminiMessage}
@@ -189,6 +205,15 @@ export default function App() {
             />
           </aside>
         </main>
+
+        {isMobile && selectedIds.size > 0 && (
+          <div className="mobile-sticky-bar">
+            <span className="mobile-sticky-count">{selectedIds.size}개 선택됨</span>
+            <button className="mobile-sticky-btn" onClick={scrollToPreview}>
+              문구 확인하기 ▲
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

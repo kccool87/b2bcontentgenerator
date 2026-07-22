@@ -1375,6 +1375,56 @@ ol, ul { list-style: none; }
 }
 
 /* ══════════════════════════════════════════
+   Mobile Sticky Bar
+   ══════════════════════════════════════════ */
+.mobile-sticky-bar {
+  display: none;
+}
+@media (max-width: 768px) {
+  .mobile-sticky-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+    animation: mobile-sticky-slide-up 0.22s ease-out;
+  }
+  @keyframes mobile-sticky-slide-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);   opacity: 1; }
+  }
+}
+.mobile-sticky-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.mobile-sticky-btn {
+  padding: 9px 18px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(132, 79, 249, 0.35);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.mobile-sticky-btn:hover {
+  background: var(--brand-dark);
+  box-shadow: 0 3px 12px rgba(132, 79, 249, 0.45);
+}
+
+/* ══════════════════════════════════════════
    액션 버튼 그리드 2×2 (B2B 컴팩트 스타일)
    ══════════════════════════════════════════ */
 .action-grid {
