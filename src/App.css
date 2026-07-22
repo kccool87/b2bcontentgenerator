@@ -69,6 +69,8 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* ── 하단 Aurora 글로우 — .app pseudo-element (z-index 정상 작동) ── */
@@ -1375,7 +1377,7 @@ ol, ul { list-style: none; }
 }
 
 /* ══════════════════════════════════════════
-   Mobile Sticky Bar
+   Mobile Sticky Bar  (≤768px only)
    ══════════════════════════════════════════ */
 .mobile-sticky-bar {
   display: none;
@@ -1386,18 +1388,16 @@ ol, ul { list-style: none; }
     align-items: center;
     justify-content: space-between;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     z-index: 200;
     background: #fff;
     border-top: 1px solid var(--border);
     padding: 12px 16px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
-    animation: mobile-sticky-slide-up 0.22s ease-out;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+    animation: sticky-slide-up 0.22s ease-out;
   }
-  @keyframes mobile-sticky-slide-up {
+  @keyframes sticky-slide-up {
     from { transform: translateY(100%); opacity: 0; }
     to   { transform: translateY(0);   opacity: 1; }
   }
@@ -1416,12 +1416,94 @@ ol, ul { list-style: none; }
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(132, 79, 249, 0.35);
+  box-shadow: 0 2px 8px rgba(132,79,249,0.35);
   transition: background 0.15s, box-shadow 0.15s;
 }
-.mobile-sticky-btn:hover {
+.mobile-sticky-btn:active {
   background: var(--brand-dark);
-  box-shadow: 0 3px 12px rgba(132, 79, 249, 0.45);
+}
+
+/* ══════════════════════════════════════════
+   Mobile Bottom Sheet
+   ══════════════════════════════════════════ */
+.mobile-sheet-backdrop {
+  display: none;
+}
+.mobile-sheet {
+  display: none;
+}
+@media (max-width: 768px) {
+  .mobile-sheet-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(0,0,0,0.45);
+    animation: backdrop-in 0.22s ease;
+  }
+  @keyframes backdrop-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .mobile-sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 301;
+    height: 88vh;
+    background: var(--bg-page);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    overflow: hidden;
+  }
+  .mobile-sheet--open {
+    transform: translateY(0);
+  }
+
+  .mobile-sheet-handle-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px 6px;
+    touch-action: none;
+    cursor: grab;
+  }
+  .mobile-sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+
+  .mobile-sheet-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0 12px 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  /* Inside sheet: let PreviewPanel fill the space */
+  .mobile-sheet-content .preview-panel {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .mobile-sheet-content .preview-box {
+    flex: 1;
+    min-height: 0;
+  }
+  .mobile-sheet-content .preview-full-textarea {
+    height: 100%;
+    min-height: 200px;
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -1510,13 +1592,13 @@ ol, ul { list-style: none; }
 @media (max-width: 768px) {
   :root { --page-pad: 14px; }
 
-  .app { height: auto; overflow: visible; display: block; }
-  .app-container { flex: none; display: block; }
+  .app { height: auto; overflow-x: hidden; overflow-y: visible; display: block; }
+  .app-container { flex: none; display: block; overflow-x: hidden; }
   .app-main {
     flex: none;
     overflow: visible;
     grid-template-columns: 1fr;
-    padding: 0 0 24px;
+    padding: 0 0 80px;
     gap: 14px;
   }
 
@@ -1525,10 +1607,7 @@ ol, ul { list-style: none; }
   .title-sub  { font-size: 13px; }
 
   .left-panel { overflow: visible; min-height: unset; }
-  .right-panel { min-height: unset; }
 
   .cards-container { flex: none; height: auto; overflow-y: visible; }
   .cards-grid { grid-template-columns: 1fr; }
-
-  .preview-panel { overflow-y: visible; flex: none; }
 }

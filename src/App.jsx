@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 
 function useIsMobile(bp = 768) {
   const [v, setV] = useState(() => typeof window !== 'undefined' && window.innerWidth <= bp);
@@ -34,11 +34,27 @@ export default function App() {
   const [shuffleSeed, setShuffleSeed]           = useState(0);
   const [relationshipStage, setRelationshipStage] = useState('초면');
 
-  const isMobile   = useIsMobile();
-  const previewRef = useRef(null);
-  const scrollToPreview = useCallback(() => {
-    previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
+  const isMobile          = useIsMobile();
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+  const sheetRef          = useRef(null);
+  const sheetDragStartY   = useRef(null);
+
+  function onSheetHandleTouchStart(e) {
+    sheetDragStartY.current = e.touches[0].clientY;
+  }
+  function onSheetHandleTouchMove(e) {
+    if (sheetDragStartY.current === null) return;
+    const delta = e.touches[0].clientY - sheetDragStartY.current;
+    if (delta > 0 && sheetRef.current) {
+      sheetRef.current.style.transform = `translateY(${delta}px)`;
+    }
+  }
+  function onSheetHandleTouchEnd(e) {
+    const delta = e.changedTouches[0].clientY - (sheetDragStartY.current ?? 0);
+    if (sheetRef.current) sheetRef.current.style.transform = '';
+    sheetDragStartY.current = null;
+    if (delta > 80) setMobileSheetOpen(false);
+  }
 
   const { results, allResults, total, isEmpty } = useSearch({ query });
   const { message: geminiMessage, isLoading, streamingText, generate, reset: resetGemini } = useGemini();
@@ -75,6 +91,10 @@ export default function App() {
       relationshipStage: relationshipStageRef.current,
     });
   }, [selectedIds]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (selectedIds.size === 0) setMobileSheetOpen(false);
+  }, [selectedIds]);
 
   function handleSetQuery(q) {
     setQuery(q);
@@ -190,31 +210,68 @@ export default function App() {
             />
           </section>
 
-          <aside className="right-panel" ref={previewRef}>
-            <PreviewPanel
-              selectedContents={selectedContents}
-              geminiMessage={geminiMessage}
-              onGenerateAI={handleGenerateAI}
-              onRemove={handleRemove}
-              onReset={handleReset}
-              onDeselect={handleDeselect}
-              isLoading={isLoading}
-              streamingText={streamingText}
-              relationshipStage={relationshipStage}
-              onRelationshipStageChange={handleRelationshipStageChange}
-            />
-          </aside>
+          {!isMobile && (
+            <aside className="right-panel">
+              <PreviewPanel
+                selectedContents={selectedContents}
+                geminiMessage={geminiMessage}
+                onGenerateAI={handleGenerateAI}
+                onRemove={handleRemove}
+                onReset={handleReset}
+                onDeselect={handleDeselect}
+                isLoading={isLoading}
+                streamingText={streamingText}
+                relationshipStage={relationshipStage}
+                onRelationshipStageChange={handleRelationshipStageChange}
+              />
+            </aside>
+          )}
         </main>
 
-        {isMobile && selectedIds.size > 0 && (
+        {isMobile && selectedIds.size > 0 && !mobileSheetOpen && (
           <div className="mobile-sticky-bar">
             <span className="mobile-sticky-count">{selectedIds.size}개 선택됨</span>
-            <button className="mobile-sticky-btn" onClick={scrollToPreview}>
+            <button className="mobile-sticky-btn" onClick={() => setMobileSheetOpen(true)}>
               문구 확인하기 ▲
             </button>
           </div>
         )}
       </div>
+
+      {isMobile && (
+        <>
+          {mobileSheetOpen && (
+            <div className="mobile-sheet-backdrop" onClick={() => setMobileSheetOpen(false)} />
+          )}
+          <div
+            className={`mobile-sheet${mobileSheetOpen ? ' mobile-sheet--open' : ''}`}
+            ref={sheetRef}
+          >
+            <div
+              className="mobile-sheet-handle-bar"
+              onTouchStart={onSheetHandleTouchStart}
+              onTouchMove={onSheetHandleTouchMove}
+              onTouchEnd={onSheetHandleTouchEnd}
+            >
+              <div className="mobile-sheet-handle" />
+            </div>
+            <div className="mobile-sheet-content">
+              <PreviewPanel
+                selectedContents={selectedContents}
+                geminiMessage={geminiMessage}
+                onGenerateAI={handleGenerateAI}
+                onRemove={handleRemove}
+                onReset={handleReset}
+                onDeselect={handleDeselect}
+                isLoading={isLoading}
+                streamingText={streamingText}
+                relationshipStage={relationshipStage}
+                onRelationshipStageChange={handleRelationshipStageChange}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
