@@ -11,13 +11,6 @@ const TYPE_LABEL = {
   AX_TREND:  'AX트렌드',
 };
 
-const LOADING_PHASES = [
-  '콘텐츠 분석 중 ·',
-  '고객 상황 파악 중 ··',
-  '소개 문구 작성 중 ···',
-  '마무리 다듬는 중 ····',
-];
-
 // ── 폴백 메시지 — 단일 선택용 ─────────────────────────────────────
 const FALLBACK_EMAIL = [
   (ctx) => `${ctx} 관련 내용을 검토하실 때 참고가 될 만한 자료를 공유드립니다. 살펴봐 주시면 감사하겠습니다.`,
@@ -61,7 +54,6 @@ function buildMultiFallback() {
   return { email: FALLBACK_MULTI_EMAIL[ei](), messenger: FALLBACK_MULTI_MESSENGER[mi]() };
 }
 
-// 모든 선택 항목에 공통으로 포함된 상품명 반환 (없으면 null)
 function getSharedProduct(contents) {
   if (contents.length <= 1) return null;
   const allSets = contents.map(c => new Set(c.products || []));
@@ -71,8 +63,6 @@ function getSharedProduct(contents) {
   return null;
 }
 
-// 다중 선택 응답에서 허용되지 않은 상품명 노출 여부 검사
-// sharedProduct 는 허용된 상품명이므로 검사에서 제외
 function hasProductLeak(parsed, contents, sharedProduct = null) {
   const names = [...new Set(contents.flatMap(c => c.products || []))]
     .filter(p => p && p.length >= 3 && p !== sharedProduct);
@@ -112,23 +102,62 @@ function buildFallback(contents, context) {
   };
 }
 
+// ── 스트리밍 텍스트 파서 ──────────────────────────────────────────
+// SSE 청크에서 조립된 원문 텍스트 → { email, messenger }
+function parseStreamedText(text) {
+  if (!text) return null;
+  let s = text.replace(/```(?:json)?\n?/g, '').trim();
+  const start = s.indexOf('{');
+  const end   = s.lastIndexOf('}');
+  if (start !== -1 && end > start) s = s.slice(start, end + 1);
+  try {
+    const parsed = JSON.parse(s);
+    return {
+      email:     (parsed.email     || '').trim(),
+      messenger: (parsed.messenger || '').trim(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ── 캐시 키 ─────────────────────────────────────────────────────
+// 같은 콘텐츠 조합 + 같은 관계 단계 → 캐시 재사용
+function buildCacheKey(contents, context) {
+  const ids   = [...contents].map(c => c.id).sort().join(',');
+  const stage = context?.relationshipStage ?? '초면';
+  return `${ids}|${stage}`;
+}
+
 // ── 훅 ─────────────────────────────────────────────────────────────
 export function useGemini() {
-  const [message, setMessage]     = useState(null);  // { email, messenger, rateLimited? } | null
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError]         = useState(null);
-  const abortRef                  = useRef(null);
+  const [message, setMessage]           = useState(null);
+  const [isLoading, setIsLoading]       = useState(false);
+  const [streamingText, setStreamingText] = useState('');
+  const [error, setError]               = useState(null);
+  const abortRef                        = useRef(null);
+  const cacheRef                        = useRef(new Map()); // 세션 내 메모리 캐시
 
   async function generate(contents, context = {}) {
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
+    // 캐시 히트 — API 호출 없이 즉시 반환
+    const cacheKey = buildCacheKey(contents, context);
+    if (cacheRef.current.has(cacheKey)) {
+      setMessage(cacheRef.current.get(cacheKey));
+      setIsLoading(false);
+      setStreamingText('');
+      setError(null);
+      return;
+    }
+
     setIsLoading(true);
+    setStreamingText('');
     setError(null);
     setMessage(null);
 
-    // hasProductLeak 검사를 위해 프론트에서 sharedProduct 계산 유지
     const sharedProduct = contents.length > 1 ? getSharedProduct(contents) : null;
 
     try {
@@ -139,7 +168,6 @@ export function useGemini() {
         body:    JSON.stringify({ contents, context }),
       });
 
-      // Rate limit 초과 — 별도 안내 메시지 (rateLimited: true 플래그)
       if (res.status === 429) {
         if (!controller.signal.aborted) {
           setMessage({
@@ -153,20 +181,62 @@ export function useGemini() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const parsed = await res.json();
+      // SSE 스트림 읽기
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let assembledText = '';
+      let buffer        = '';
 
-      if (!controller.signal.aborted) {
-        // 다중 선택: 허용되지 않은 상품명 노출 시 폴백으로 교체
-        // sharedProduct 는 허용된 상품이므로 hasProductLeak 에서 제외됨
-        if (parsed?.email && contents.length > 1 && hasProductLeak(parsed, contents, sharedProduct)) {
-          setMessage(buildMultiFallback());
-        } else {
-          setMessage(parsed?.email ? parsed : buildFallback(contents, context));
+      while (true) {
+        if (controller.signal.aborted) break;
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? ''; // 마지막 불완전 줄은 다음 청크로 넘김
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const json = line.slice(6).trim();
+          if (!json) continue;
+          try {
+            const evt  = JSON.parse(json);
+            const text = evt?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+            if (text) {
+              assembledText += text;
+              if (!controller.signal.aborted) setStreamingText(assembledText);
+            }
+          } catch {
+            // 파싱 실패 청크는 무시
+          }
         }
+      }
+
+      // 스트림 종료 → 조립된 텍스트 파싱
+      if (!controller.signal.aborted) {
+        const parsed = parseStreamedText(assembledText);
+
+        let finalMsg;
+        if (parsed?.email) {
+          if (contents.length > 1 && hasProductLeak(parsed, contents, sharedProduct)) {
+            finalMsg = buildMultiFallback();
+          } else {
+            // 성공적인 AI 응답만 캐싱
+            cacheRef.current.set(cacheKey, parsed);
+            finalMsg = parsed;
+          }
+        } else {
+          finalMsg = buildFallback(contents, context);
+        }
+
+        setStreamingText('');
+        setMessage(finalMsg);
       }
     } catch (err) {
       if (err.name === 'AbortError') return;
       if (!controller.signal.aborted) {
+        setStreamingText('');
         setMessage(buildFallback(contents, context));
       }
     } finally {
@@ -180,7 +250,8 @@ export function useGemini() {
     setMessage(null);
     setError(null);
     setIsLoading(false);
+    setStreamingText('');
   }
 
-  return { message, isLoading, error, generate, reset };
+  return { message, isLoading, streamingText, error, generate, reset };
 }

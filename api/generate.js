@@ -4,7 +4,6 @@
 import { Redis } from '@upstash/redis';
 
 // ── Rate limiting (Upstash Redis) ────────────────────────────────────────
-// Skip if env vars are absent (local dev without vercel dev).
 const redis =
   process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
     ? new Redis({
@@ -29,17 +28,15 @@ async function checkRateLimit(ip) {
       .incr(hourKey)
       .expire(hourKey, 7200)
       .exec();
-    const minCnt  = results[0];
-    const hourCnt = results[2];
-    return minCnt <= RATE_PER_MIN && hourCnt <= RATE_PER_HOUR;
+    return results[0] <= RATE_PER_MIN && results[2] <= RATE_PER_HOUR;
   } catch {
-    return true; // Redis 장애 시 허용
+    return true;
   }
 }
 
 // ── Gemini ───────────────────────────────────────────────────────────────
-const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_STREAM_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent';
 
 const SYSTEM_PROMPT = `You are a B2B sales assistant for LG U+ Enterprise.
 
@@ -99,6 +96,27 @@ Return ONLY a raw JSON object. No markdown. No code blocks. No explanation.
 - Keep it informational, low-pressure
 - Do NOT directly connect to a product pitch
 - DO keep tone casual and curious
+
+---
+
+### 관계 단계별 톤 가이드
+
+관계 단계는 user 프롬프트의 "관계 단계:" 줄에서 확인합니다. 없으면 "초면"으로 간주합니다.
+
+**초면 (콜드)**
+❌ 기존 관계가 있는 것처럼 표현 ("지난번에...", "항상 감사합니다", "또 연락드려요")
+✅ 정중하고 격식 있는 합쇼체, 신뢰감 있는 첫인상 중심 문구
+✅ 단도직입적으로 가치 제안 전달, "처음 연락드리는" 뉘앙스
+
+**기존 거래처**
+❌ 낯선 사람 대하듯 딱딱하게 거리 두기
+✅ 편안한 어조, "이번에도", "지속적으로" 같은 관계 지속 표현 허용
+✅ 신규 고객에게 기초부터 설명하듯 소개하지 않아도 됨
+
+**재구매 검토**
+❌ 신규 고객처럼 처음부터 상품을 소개하는 문구
+✅ 기존 사용 경험을 인정하는 뉘앙스 ("이미 활용하고 계신...", "추가 도입 시 연계하여")
+✅ 업그레이드·확장·ROI 관점의 가치 강조
 
 ---
 
@@ -216,7 +234,8 @@ function getSharedProduct(contents) {
   return null;
 }
 
-function buildUserPrompt(contents) {
+function buildUserPrompt(contents, context = {}) {
+  const { relationshipStage = '초면' } = context;
   const categories    = [...new Set(contents.map(c => TYPE_LABEL[c.type] ?? c.type))].join(', ');
   const sharedProduct = contents.length > 1 ? getSharedProduct(contents) : null;
 
@@ -239,23 +258,8 @@ function buildUserPrompt(contents) {
   const productNote = sharedProduct
     ? `\n공통 상품: ${sharedProduct} (이 상품명을 문구에 자연스럽게 언급하세요)`
     : '';
-  return `카테고리: ${categories}\n선택 수: ${contents.length}개${productNote}\n\n${contentLines}`;
-}
 
-function parseGeminiJSON(raw) {
-  let s = raw.replace(/```(?:json)?\n?/g, '').trim();
-  const start = s.indexOf('{');
-  const end   = s.lastIndexOf('}');
-  if (start !== -1 && end > start) s = s.slice(start, end + 1);
-  try {
-    const parsed = JSON.parse(s);
-    return {
-      email:     (parsed.email     || '').trim(),
-      messenger: (parsed.messenger || '').trim(),
-    };
-  } catch {
-    return null;
-  }
+  return `카테고리: ${categories}\n선택 수: ${contents.length}개\n관계 단계: ${relationshipStage}${productNote}\n\n${contentLines}`;
 }
 
 // ── 핸들러 ───────────────────────────────────────────────────────────────
@@ -264,20 +268,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // IP 추출 (Vercel은 x-forwarded-for 헤더로 실제 IP 전달)
   const ip =
     (req.headers['x-forwarded-for'] ?? '').split(',')[0].trim() ||
     req.socket?.remoteAddress ||
     'unknown';
 
-  // Rate limit 확인
   const allowed = await checkRateLimit(ip);
   if (!allowed) {
     return res.status(429).json({ error: '잠시 후 다시 시도해주세요' });
   }
 
-  // 요청 바디 검증
-  const { contents } = req.body ?? {};
+  const { contents, context } = req.body ?? {};
   if (!Array.isArray(contents) || contents.length === 0) {
     return res.status(400).json({ error: 'contents is required' });
   }
@@ -287,10 +288,11 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server misconfigured: GEMINI_API_KEY not set' });
   }
 
-  const userPrompt = buildUserPrompt(contents);
+  const userPrompt = buildUserPrompt(contents, context ?? {});
 
+  let geminiRes;
   try {
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+    geminiRes = await fetch(`${GEMINI_STREAM_URL}?alt=sse&key=${apiKey}`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -299,21 +301,31 @@ export default async function handler(req, res) {
         generationConfig:   { temperature: 0.95, topP: 0.95, maxOutputTokens: 400 },
       }),
     });
-
-    if (!geminiRes.ok) {
-      const body = await geminiRes.json().catch(() => ({}));
-      return res.status(502).json({ error: body.error?.message ?? `Gemini ${geminiRes.status}` });
-    }
-
-    const data   = await geminiRes.json();
-    const raw    = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    const parsed = parseGeminiJSON(raw);
-
-    if (!parsed) {
-      return res.status(502).json({ error: 'Failed to parse Gemini response' });
-    }
-    return res.status(200).json(parsed);
   } catch (e) {
     return res.status(502).json({ error: e.message });
+  }
+
+  if (!geminiRes.ok) {
+    const body = await geminiRes.json().catch(() => ({}));
+    return res.status(502).json({ error: body.error?.message ?? `Gemini ${geminiRes.status}` });
+  }
+
+  // Stream the SSE response back to the client
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('X-Accel-Buffering', 'no');
+
+  const reader  = geminiRes.body.getReader();
+  const decoder = new TextDecoder();
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      if (!res.writableEnded) res.write(chunk);
+    }
+  } finally {
+    if (!res.writableEnded) res.end();
   }
 }

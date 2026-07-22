@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 const NUMS = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
 function num(i) { return NUMS[i] ?? String(i + 1); }
 
-// ── 인사말 풀 (이메일 = 합쇼체·격식 / 메신저 = 해요체·자연스럽게) ──
+// ── 인사말 풀 ──────────────────────────────────────────────────────
 const EMAIL_GREETINGS = [
   '안녕하세요. 지난번에 말씀 나눴던 LG유플러스 OOO입니다.',
   '안녕하세요. 한번 인사 드렸던 LG유플러스 영업담당 OOO입니다.',
@@ -40,7 +40,14 @@ const LOADING_PHASES = [
   '마무리 다듬는 중 ····',
 ];
 
-// ── 제목 정제 ───────────────────────────────────────────────────
+// ── 관계 단계 정의 ───────────────────────────────────────────────
+const RELATIONSHIP_STAGES = [
+  { value: '초면',       label: '초면(콜드)' },
+  { value: '기존 거래처', label: '기존 거래처' },
+  { value: '재구매 검토', label: '재구매 검토' },
+];
+
+// ── 제목 정제 ───────────────────────────────────────────────────────
 const TITLE_SUFFIX = / - LG Uplus Enterprise$/i;
 
 function decodeHtml(s) {
@@ -55,7 +62,7 @@ function decodeHtml(s) {
 
 function ct(title) { return title ? decodeHtml(title.replace(TITLE_SUFFIX, '')) : title; }
 
-// ── URL 처리 ────────────────────────────────────────────────────
+// ── URL 처리 ────────────────────────────────────────────────────────
 function cleanUrl(url) {
   try { return decodeURIComponent(url); } catch { return url; }
 }
@@ -69,7 +76,6 @@ function displayUrl(url) {
   }
 }
 
-// ── URL 링크 헬퍼 ───────────────────────────────────────────────
 function UrlLink({ item }) {
   return (
     <a href={cleanUrl(item.url)} target="_blank" rel="noopener noreferrer" className="preview-link">
@@ -78,59 +84,7 @@ function UrlLink({ item }) {
   );
 }
 
-// ── 탭별 미리보기 JSX ────────────────────────────────────────────
-
-// 이메일: 합쇼체 인사 + 격식 도입문 + 제목·요약·URL + 랜덤 맺음말
-function EmailPreview({ greeting, intro, items, closing }) {
-  return (
-    <>
-      {greeting}{'\n\n'}
-      {intro && <>{intro}{'\n\n'}</>}
-      {items.map((c, i) => (
-        <span key={c.id}>
-          {i > 0 && '\n\n'}
-          {num(i)} {ct(c.title)}{'\n'}
-          {'- '}{c.summary}{'\n'}
-          <UrlLink item={c} />
-        </span>
-      ))}
-      {'\n\n'}{closing}
-    </>
-  );
-}
-
-// 메신저: 해요체 인사 + 가벼운 도입문 + 제목·URL만 (요약 없음)
-function MessengerPreview({ greeting, intro, items }) {
-  return (
-    <>
-      {greeting}{'\n\n'}
-      {intro && <>{intro}{'\n\n'}</>}
-      {items.map((c, i) => (
-        <span key={c.id}>
-          {i > 0 && '\n'}
-          {num(i)} {ct(c.title)}{'\n'}
-          {'🔗 '}<UrlLink item={c} />
-        </span>
-      ))}
-    </>
-  );
-}
-
-function UrlPreview({ items }) {
-  return (
-    <>
-      {items.map((c, i) => (
-        <span key={c.id}>
-          {i > 0 && '\n\n'}
-          {num(i)} {ct(c.title)}{'\n'}
-          <UrlLink item={c} />
-        </span>
-      ))}
-    </>
-  );
-}
-
-// ── 복사용 plain text 빌더 ───────────────────────────────────────
+// ── 복사용 plain text 빌더 ───────────────────────────────────────────
 function buildEmailCopy(items, greeting, intro, closing) {
   const head = intro ? `${greeting}\n\n${intro}` : greeting;
   const body = items
@@ -162,7 +116,7 @@ async function writeClipboard(text) {
   document.body.removeChild(ta);
 }
 
-// ── SNS 바 ─────────────────────────────────────────────────────────
+// ── SNS 바 ─────────────────────────────────────────────────────────────
 const SNS_LINKS = [
   { name: 'naverblog', href: 'https://blog.naver.com/lguplusbusiness',              label: '네이버 블로그' },
   { name: 'wordpress', href: 'https://lguplusenterprise.com/',                       label: '워드프레스' },
@@ -193,23 +147,103 @@ const FORMAT_TABS = [
   { key: 'url',       icon: '🔗', label: '제목+URL' },
 ];
 
+// ── 이메일/메신저 미리보기 — 편집 가능 구조 ────────────────────────
+function EditableEmailPreview({ greeting, intro, onIntroChange, items, closing }) {
+  return (
+    <div className="preview-editable">
+      <pre className="preview-static-seg">{greeting}</pre>
+      <textarea
+        className="preview-intro-textarea"
+        value={intro}
+        onChange={(e) => onIntroChange(e.target.value)}
+        placeholder="콘텐츠를 선택하면 AI가 소개 문구를 생성합니다."
+        rows={3}
+      />
+      <pre className="preview-static-seg preview-items-seg">
+        {items.map((c, i) => (
+          <span key={c.id}>
+            {'\n\n'}{num(i)} {ct(c.title)}{'\n'}
+            {'- '}{c.summary}{'\n'}
+            <UrlLink item={c} />
+          </span>
+        ))}
+        {'\n\n'}{closing}
+      </pre>
+    </div>
+  );
+}
+
+function EditableMessengerPreview({ greeting, intro, onIntroChange, items }) {
+  return (
+    <div className="preview-editable">
+      <pre className="preview-static-seg">{greeting}</pre>
+      <textarea
+        className="preview-intro-textarea"
+        value={intro}
+        onChange={(e) => onIntroChange(e.target.value)}
+        placeholder="콘텐츠를 선택하면 AI가 소개 문구를 생성합니다."
+        rows={2}
+      />
+      <pre className="preview-static-seg preview-items-seg">
+        {items.map((c, i) => (
+          <span key={c.id}>
+            {'\n'}{num(i)} {ct(c.title)}{'\n'}
+            {'🔗 '}<UrlLink item={c} />
+          </span>
+        ))}
+      </pre>
+    </div>
+  );
+}
+
+function UrlPreview({ items }) {
+  return (
+    <pre className="preview-text">
+      {items.map((c, i) => (
+        <span key={c.id}>
+          {i > 0 && '\n\n'}
+          {num(i)} {ct(c.title)}{'\n'}
+          <UrlLink item={c} />
+        </span>
+      ))}
+    </pre>
+  );
+}
+
 // ── 컴포넌트 ──────────────────────────────────────────────────────
 export default function PreviewPanel({
   selectedContents,
-  geminiMessage,        // { email: string, messenger: string } | null
+  geminiMessage,
   onGenerateAI,
   onRemove,
   onReset,
   onDeselect,
   isLoading,
+  streamingText,
+  relationshipStage,
+  onRelationshipStageChange,
 }) {
-  const [activeTab, setActiveTab]           = useState('email');
-  const [copied, setCopied]                 = useState(false);
-  const [phaseIdx, setPhaseIdx]             = useState(0);
-  const [emailGreeting, setEmailGreeting]   = useState(() => pick(EMAIL_GREETINGS));
-  const [msgGreeting,   setMsgGreeting]     = useState(() => pick(MESSENGER_GREETINGS));
-  const [emailClosing,  setEmailClosing]    = useState(() => pick(EMAIL_CLOSINGS));
+  const [activeTab, setActiveTab]         = useState('email');
+  const [copied, setCopied]               = useState(false);
+  const [kakaoShared, setKakaoShared]     = useState(false);
+  const [phaseIdx, setPhaseIdx]           = useState(0);
+  const [emailGreeting, setEmailGreeting] = useState(() => pick(EMAIL_GREETINGS));
+  const [msgGreeting,   setMsgGreeting]   = useState(() => pick(MESSENGER_GREETINGS));
+  const [emailClosing,  setEmailClosing]  = useState(() => pick(EMAIL_CLOSINGS));
 
+  // 편집 가능한 AI 소개 문구 로컬 state
+  const [editedEmail,     setEditedEmail]     = useState('');
+  const [editedMessenger, setEditedMessenger] = useState('');
+
+  // 새 AI 응답이 오면 편집 state 동기화
+  useEffect(() => {
+    if (geminiMessage && !geminiMessage.rateLimited) {
+      setEditedEmail(geminiMessage.email ?? '');
+      setEditedMessenger(geminiMessage.messenger ?? '');
+    }
+  }, [geminiMessage]);
+
+  // 로딩 페이즈 애니메이션 (스트리밍 시작 전 spinner용)
   useEffect(() => {
     if (!isLoading) { setPhaseIdx(0); return; }
     const id = setInterval(() => setPhaseIdx((i) => (i + 1) % LOADING_PHASES.length), 700);
@@ -225,15 +259,22 @@ export default function PreviewPanel({
       setMsgGreeting(pick(MESSENGER_GREETINGS));
       setEmailClosing(pick(EMAIL_CLOSINGS));
     }
-  }, [selectedContents?.length]);
+  }, [selectedContents?.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // geminiMessage = { email, messenger } 객체
-  const emailIntro     = geminiMessage?.email     ?? '';
-  const messengerIntro = geminiMessage?.messenger ?? '';
+  // AI 원본 문구로 되돌리기
+  function handleResetToAI() {
+    if (!geminiMessage || geminiMessage.rateLimited) return;
+    setEditedEmail(geminiMessage.email ?? '');
+    setEditedMessenger(geminiMessage.messenger ?? '');
+  }
+
+  const isEmailEdited     = !!geminiMessage && !geminiMessage.rateLimited && editedEmail     !== (geminiMessage.email     ?? '');
+  const isMessengerEdited = !!geminiMessage && !geminiMessage.rateLimited && editedMessenger !== (geminiMessage.messenger ?? '');
+  const isIntroEdited     = activeTab === 'email' ? isEmailEdited : activeTab === 'messenger' ? isMessengerEdited : false;
 
   function getCopyText() {
-    if (activeTab === 'email')     return buildEmailCopy(selectedContents, emailGreeting, emailIntro, emailClosing);
-    if (activeTab === 'messenger') return buildMessengerCopy(selectedContents, msgGreeting, messengerIntro);
+    if (activeTab === 'email')     return buildEmailCopy(selectedContents, emailGreeting, editedEmail, emailClosing);
+    if (activeTab === 'messenger') return buildMessengerCopy(selectedContents, msgGreeting, editedMessenger);
     return buildUrlCopy(selectedContents);
   }
 
@@ -242,6 +283,26 @@ export default function PreviewPanel({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
+
+  // 카카오톡 공유: 메신저 문구 복사 + 앱/웹 열기 시도
+  async function handleKakaoShare() {
+    const text = buildMessengerCopy(selectedContents, msgGreeting, editedMessenger);
+    await writeClipboard(text);
+    setKakaoShared(true);
+    setTimeout(() => setKakaoShared(false), 2500);
+    // 모바일에서 카카오톡 앱 열기 시도 (데스크탑에서는 무시됨)
+    try { window.open('kakaotalk://', '_self'); } catch {}
+  }
+
+  // 메일로 보내기: 제목 + 이메일 본문을 mailto: 링크로 전달
+  function handleMailTo() {
+    const subject = selectedContents.map((c, i) => `${num(i)} ${ct(c.title)}`).join(' / ');
+    const body    = buildEmailCopy(selectedContents, emailGreeting, editedEmail, emailClosing);
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
+  }
+
+  // 스트리밍 중 표시 여부
+  const isStreaming = isLoading && !!streamingText;
 
   return (
     <div className="preview-panel">
@@ -259,7 +320,7 @@ export default function PreviewPanel({
         )}
       </div>
 
-      {/* 선택된 콘텐츠 — 칩 형태 (선택 시만 노출) */}
+      {/* 선택된 콘텐츠 칩 */}
       {!isEmpty && (
         <>
           <p className="selected-chips-label">선택된 콘텐츠 ({selectedContents.length}개)</p>
@@ -273,6 +334,24 @@ export default function PreviewPanel({
             ))}
           </div>
         </>
+      )}
+
+      {/* 관계 단계 선택 */}
+      {!isEmpty && (
+        <div className="relationship-stage-row">
+          <span className="relationship-stage-label">관계 단계</span>
+          <div className="relationship-stage-btns">
+            {RELATIONSHIP_STAGES.map(({ value, label }) => (
+              <button
+                key={value}
+                className={`stage-btn${relationshipStage === value ? ' stage-btn--active' : ''}`}
+                onClick={() => onRelationshipStageChange(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* 포맷 탭 */}
@@ -297,29 +376,58 @@ export default function PreviewPanel({
             <span className="preview-empty-icon">✦</span>
             <p>콘텐츠를 선택하면<br />고객 제안 문구가 생성됩니다.</p>
           </div>
+        ) : isStreaming ? (
+          /* 스트리밍 중 — 원문 텍스트가 타이핑되듯 표시 */
+          <pre className="preview-streaming">{streamingText}</pre>
         ) : isLoading ? (
+          /* 스트리밍 시작 전 스피너 */
           <div className="preview-loading">
             <span className="loading-spinner" />
             <span className="loading-text">{LOADING_PHASES[phaseIdx]}</span>
           </div>
         ) : (
-          <pre className="preview-text">
-            {activeTab === 'email'     && <EmailPreview     greeting={emailGreeting} intro={emailIntro}     items={selectedContents} closing={emailClosing} />}
-            {activeTab === 'messenger' && <MessengerPreview greeting={msgGreeting}   intro={messengerIntro} items={selectedContents} />}
-            {activeTab === 'url'       && <UrlPreview       items={selectedContents} />}
-          </pre>
+          /* 완료 — 편집 가능한 미리보기 */
+          <>
+            {activeTab === 'email' && (
+              <EditableEmailPreview
+                greeting={emailGreeting}
+                intro={editedEmail}
+                onIntroChange={setEditedEmail}
+                items={selectedContents}
+                closing={emailClosing}
+              />
+            )}
+            {activeTab === 'messenger' && (
+              <EditableMessengerPreview
+                greeting={msgGreeting}
+                intro={editedMessenger}
+                onIntroChange={setEditedMessenger}
+                items={selectedContents}
+              />
+            )}
+            {activeTab === 'url' && (
+              <UrlPreview items={selectedContents} />
+            )}
+          </>
         )}
       </div>
 
       {/* 하단 액션 영역 */}
       <div className="copy-action-area">
-        <p className="copy-action-hint">✦ 클릭할 때마다 새로운 AI 문구가 생성됩니다.</p>
+        <div className="copy-action-hint-row">
+          <p className="copy-action-hint">✦ 클릭할 때마다 새로운 AI 문구가 생성됩니다.</p>
+          {isIntroEdited && (
+            <button className="reset-to-ai-btn" onClick={handleResetToAI} title="AI가 생성한 원본 문구로 되돌립니다">
+              AI 문구로 되돌리기
+            </button>
+          )}
+        </div>
         <div className="copy-action-row">
           <button
             className={`ai-regen-btn${isLoading ? ' ai-regen-btn--loading' : ''}`}
             onClick={onGenerateAI}
             disabled={isLoading || isEmpty}
-            title="AI가 새로운 소개 문구를 생성합니다"
+            title="현재 관계 단계 설정으로 AI 문구를 새로 생성합니다"
           >
             {isLoading ? (
               <><span className="ai-regen-spinner" />생성 중</>
@@ -333,6 +441,28 @@ export default function PreviewPanel({
             disabled={isLoading || isEmpty}
           >
             {copied ? '✓ 복사 완료!' : '문구 복사하기'}
+          </button>
+        </div>
+
+        {/* 발송 버튼 — copy-action-area 내부에 배치해야 overflow:hidden에 잘리지 않음 */}
+        <div className="share-btn-row">
+          <button
+            className={`share-btn share-btn--kakao${kakaoShared ? ' share-btn--done' : ''}`}
+            onClick={handleKakaoShare}
+            disabled={isLoading || isEmpty}
+            title="메신저 문구를 복사하고 카카오톡을 엽니다"
+          >
+            <span className="share-btn-icon">💬</span>
+            {kakaoShared ? '복사됨! 카카오톡에 붙여넣기' : '카카오톡으로 보내기'}
+          </button>
+          <button
+            className="share-btn share-btn--email"
+            onClick={handleMailTo}
+            disabled={isLoading || isEmpty}
+            title="이메일 문구를 기본 메일 앱으로 보냅니다"
+          >
+            <span className="share-btn-icon">✉</span>
+            이메일로 보내기
           </button>
         </div>
       </div>

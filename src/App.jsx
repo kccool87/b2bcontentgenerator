@@ -8,7 +8,6 @@ import { useGemini } from './hooks/useGemini';
 import { contentData } from './data/contentData';
 import './App.css';
 
-// Fisher-Yates 셔플 — 앱 마운트 시 한 번만 실행
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -19,28 +18,32 @@ function shuffle(arr) {
 }
 
 export default function App() {
-  const [query, setQuery]     = useState('');
-  const [showAll, setShowAll] = useState(true);
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [shuffleSeed, setShuffleSeed] = useState(0);
+  const [query, setQuery]       = useState('');
+  const [showAll, setShowAll]   = useState(true);
+  const [selectedIds, setSelectedIds]           = useState(new Set());
+  const [shuffleSeed, setShuffleSeed]           = useState(0);
+  const [relationshipStage, setRelationshipStage] = useState('초면');
 
   const { results, allResults, total, isEmpty } = useSearch({ query });
-  const { message: geminiMessage, isLoading, generate, reset: resetGemini } = useGemini();
+  const { message: geminiMessage, isLoading, streamingText, generate, reset: resetGemini } = useGemini();
 
-  // 탭 클릭 시마다 재셔플
   const shuffledAll = useMemo(() => shuffle(contentData), [shuffleSeed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTabClick() {
     setShuffleSeed((s) => s + 1);
   }
 
-  // generate / reset 최신 참조를 ref에 유지 (useEffect 의존성 문제 방지)
+  // generate / reset 최신 참조를 ref에 유지
   const generateRef   = useRef(generate);
   const resetRef      = useRef(resetGemini);
   generateRef.current = generate;
   resetRef.current    = resetGemini;
 
-  // 카드 선택이 바뀔 때마다 소개 문구 자동 생성
+  // 관계 단계는 auto-trigger 대상이 아니므로 ref로만 읽음
+  const relationshipStageRef    = useRef(relationshipStage);
+  relationshipStageRef.current  = relationshipStage;
+
+  // 카드 선택이 바뀔 때만 자동 생성 (관계 단계 변경 시는 미트리거)
   useEffect(() => {
     if (selectedIds.size === 0) {
       resetRef.current();
@@ -49,18 +52,21 @@ export default function App() {
     const newContents = contentData.filter((item) => selectedIds.has(item.id));
     const prods = [...new Set(newContents.flatMap((c) => c.products))];
     const inds  = [...new Set(newContents.flatMap((c) => c.industries))];
-    generateRef.current(newContents, { query, selectedProducts: prods, selectedIndustries: inds });
+    generateRef.current(newContents, {
+      query,
+      selectedProducts:  prods,
+      selectedIndustries: inds,
+      relationshipStage: relationshipStageRef.current,
+    });
   }, [selectedIds]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 검색어 입력 시 showAll 연동
   function handleSetQuery(q) {
     setQuery(q);
-    setShowAll(!q); // 검색어 있으면 false, 없으면 true(전체보기)
+    setShowAll(!q);
   }
 
   function handleToggleAll() {
     setShowAll(true);
-    // 검색 중에도 query 유지 — 관련 콘텐츠 전체 노출
   }
 
   function toggleSelect(id) {
@@ -93,20 +99,21 @@ export default function App() {
     resetGemini();
   }
 
-  // 수동으로 "소개 문구 자동 생성" 버튼 클릭 시 재생성
+  // "다시 생성" 버튼 클릭 — 관계 단계 포함
   async function handleGenerateAI() {
     if (selectedContents.length === 0) return;
     const prods = [...new Set(selectedContents.flatMap((c) => c.products))];
     const inds  = [...new Set(selectedContents.flatMap((c) => c.industries))];
-    await generate(selectedContents, { query, selectedProducts: prods, selectedIndustries: inds });
+    await generate(selectedContents, {
+      query,
+      selectedProducts:  prods,
+      selectedIndustries: inds,
+      relationshipStage,
+    });
   }
 
-  // 표시 결과
-  const displayResults = showAll
-    ? (query ? allResults : shuffledAll)
-    : results;
-
-  const showResultCount = showAll || (query && !isEmpty);
+  const displayResults   = showAll ? (query ? allResults : shuffledAll) : results;
+  const showResultCount  = showAll || (query && !isEmpty);
 
   return (
     <div className="app">
@@ -161,6 +168,9 @@ export default function App() {
               onReset={handleReset}
               onDeselect={handleDeselect}
               isLoading={isLoading}
+              streamingText={streamingText}
+              relationshipStage={relationshipStage}
+              onRelationshipStageChange={setRelationshipStage}
             />
           </aside>
         </main>
