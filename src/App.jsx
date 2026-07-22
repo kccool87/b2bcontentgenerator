@@ -248,12 +248,21 @@ export default function App() {
             ref={sheetRef}
           >
             <div
-              className="mobile-sheet-handle-bar"
+              className="mobile-sheet-header"
               onTouchStart={onSheetHandleTouchStart}
               onTouchMove={onSheetHandleTouchMove}
               onTouchEnd={onSheetHandleTouchEnd}
             >
-              <div className="mobile-sheet-handle" />
+              <div className="mobile-sheet-pill" />
+              <div className="mobile-sheet-title-row">
+                <span className="mobile-sheet-title">문구 미리보기</span>
+                <button
+                  className="mobile-sheet-close-btn"
+                  onClick={() => setMobileSheetOpen(false)}
+                >
+                  닫기 ✕
+                </button>
+              </div>
             </div>
             <div className="mobile-sheet-content">
               <PreviewPanel

@@ -1453,6 +1453,9 @@ ol, ul { list-style: none; }
     bottom: 0; left: 0; right: 0;
     z-index: 301;
     height: 88vh;
+    height: 88dvh;
+    max-height: 88vh;
+    max-height: 88dvh;
     background: var(--bg-page);
     border-radius: 20px 20px 0 0;
     box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
@@ -1464,20 +1467,53 @@ ol, ul { list-style: none; }
     transform: translateY(0);
   }
 
-  .mobile-sheet-handle-bar {
+  /* 시트 상단 헤더 (드래그 + 닫기 버튼) */
+  .mobile-sheet-header {
     flex-shrink: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 16px 6px;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 16px 10px;
+    border-bottom: 1px solid var(--border);
     touch-action: none;
     cursor: grab;
+    background: var(--bg-card);
+    border-radius: 20px 20px 0 0;
   }
-  .mobile-sheet-handle {
+  .mobile-sheet-pill {
     width: 36px;
     height: 4px;
     background: var(--border);
     border-radius: 2px;
+    align-self: center;
+  }
+  .mobile-sheet-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mobile-sheet-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-1);
+  }
+  .mobile-sheet-close-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .mobile-sheet-close-btn:active {
+    background: var(--border);
+    color: var(--text-1);
   }
 
   .mobile-sheet-content {
