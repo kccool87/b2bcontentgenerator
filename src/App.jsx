@@ -112,6 +112,21 @@ export default function App() {
     });
   }
 
+  // 관계 단계 변경 — 콘텐츠 선택 중이면 즉시 재생성
+  function handleRelationshipStageChange(stage) {
+    setRelationshipStage(stage);
+    if (selectedContents.length > 0) {
+      const prods = [...new Set(selectedContents.flatMap((c) => c.products))];
+      const inds  = [...new Set(selectedContents.flatMap((c) => c.industries))];
+      generate(selectedContents, {
+        query,
+        selectedProducts:  prods,
+        selectedIndustries: inds,
+        relationshipStage: stage,
+      });
+    }
+  }
+
   const displayResults   = showAll ? (query ? allResults : shuffledAll) : results;
   const showResultCount  = showAll || (query && !isEmpty);
 
@@ -170,7 +185,7 @@ export default function App() {
               isLoading={isLoading}
               streamingText={streamingText}
               relationshipStage={relationshipStage}
-              onRelationshipStageChange={setRelationshipStage}
+              onRelationshipStageChange={handleRelationshipStageChange}
             />
           </aside>
         </main>

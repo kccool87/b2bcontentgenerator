@@ -1306,50 +1306,31 @@ ol, ul { list-style: none; }
 }
 
 /* ══════════════════════════════════════════
-   편집 가능한 미리보기 (PreviewPanel)
+   전체 편집 가능 textarea (PreviewPanel)
    ══════════════════════════════════════════ */
-.preview-editable {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-/* 정적 텍스트 세그먼트 (인사말, 항목 목록, 맺음말) */
-.preview-static-seg {
-  font-size: 13px;
-  line-height: 1.8;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-family: inherit;
-  color: var(--text-2);
-  padding: 0;
-  margin: 0;
-  background: transparent;
-}
-.preview-items-seg {
-  margin-top: 2px;
-}
-/* AI 소개 문구 편집 textarea */
-.preview-intro-textarea {
+.preview-full-textarea {
+  display: block;
   width: 100%;
+  height: 100%;
   font-size: 13px;
   line-height: 1.8;
   font-family: inherit;
   color: var(--text-2);
-  background: rgba(132,79,249,0.04);
-  border: 1.5px solid rgba(132,79,249,0.2);
+  background: transparent;
+  border: 1.5px solid transparent;
   border-radius: var(--r-sm);
-  padding: 8px 10px;
-  resize: vertical;
-  min-height: 56px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  margin: 6px 0;
+  resize: none;
+  padding: 2px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(132,79,249,0.3) transparent;
+  transition: border-color 0.18s, background 0.18s;
 }
-.preview-intro-textarea:focus {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px var(--brand-glow);
+.preview-full-textarea:focus {
+  border-color: rgba(132,79,249,0.3);
+  background: rgba(255,255,255,0.35);
 }
-.preview-intro-textarea::placeholder { color: var(--text-4); font-style: italic; }
 
 /* 스트리밍 텍스트 표시 */
 .preview-streaming {
@@ -1389,58 +1370,86 @@ ol, ul { list-style: none; }
 }
 
 /* ══════════════════════════════════════════
-   발송 공유 버튼 (카카오톡 / 메일)
+   액션 버튼 그리드 (AI 재생성 + 복사 + 카카오 + 이메일)
    ══════════════════════════════════════════ */
-.share-btn-row {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
 }
-.share-btn {
-  flex: 1;
+
+.action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 8px 10px;
+  padding: 10px 8px;
   border-radius: var(--r-md);
   font-size: 12px;
   font-weight: 700;
-  border: 1.5px solid transparent;
+  border: none;
   white-space: nowrap;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.15s, border-color 0.15s;
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, box-shadow 0.15s, background 0.15s;
+  line-height: 1.2;
 }
-.share-btn:hover:not(:disabled) { transform: translateY(-1px); }
-.share-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.share-btn-icon { font-size: 14px; line-height: 1; flex-shrink: 0; }
+.action-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.06); }
+.action-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.96); }
+.action-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; filter: none; }
+
+/* AI 다시 생성 — 전체 너비, 보라색 그라디언트 */
+.action-btn--regen {
+  grid-column: 1 / -1;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(130deg, #6b38e8 0%, #844ff9 55%, #a370ff 100%);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.16);
+  letter-spacing: 0.2px;
+  animation: ai-glow 2.6s ease-in-out infinite;
+}
+.action-btn--regen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+  animation: ai-sweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.action-btn--regen:disabled {
+  background: var(--text-4);
+  border-color: transparent;
+  animation: none;
+  box-shadow: none;
+}
+.action-btn--regen:disabled::after { display: none; }
+.action-btn--loading { opacity: 0.75 !important; }
+
+/* 복사 — 짙은 슬레이트 */
+.action-btn--copy {
+  background: #4b5563;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.action-btn--copy-done { background: #10b981 !important; box-shadow: 0 2px 8px rgba(16,185,129,0.35) !important; }
 
 /* 카카오톡 — 브랜드 옐로우 */
-.share-btn--kakao {
+.action-btn--kakao {
   background: #FEE500;
   color: #191600;
-  box-shadow: 0 2px 8px rgba(254,229,0,0.35);
+  box-shadow: 0 2px 6px rgba(254,229,0,0.35);
 }
-.share-btn--kakao:hover:not(:disabled) {
-  background: #f5dc00;
-  box-shadow: 0 4px 12px rgba(254,229,0,0.5);
-}
-.share-btn--kakao.share-btn--done {
-  background: #e6cc00;
-  font-size: 11px;
-}
+.action-btn--kakao-done { background: #e6cc00 !important; font-size: 10.5px; }
 
-/* 메일 — 차분한 블루 */
-.share-btn--email {
-  background: #eef2ff;
-  color: #3730a3;
-  border-color: #c7d2fe;
-  box-shadow: 0 1px 4px rgba(99,102,241,0.12);
+/* 이메일 — 슬레이트 (복사와 동일 계열) */
+.action-btn--email {
+  background: #4b5563;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  opacity: 0.88;
 }
-.share-btn--email:hover:not(:disabled) {
-  background: #e0e7ff;
-  border-color: #a5b4fc;
-  box-shadow: 0 3px 8px rgba(99,102,241,0.2);
-}
+.action-btn--email:hover:not(:disabled) { opacity: 1; }
 
 /* ══════════════════════════════════════════
    Responsive — 768px
