@@ -77,7 +77,7 @@ export default function BackgroundNetwork() {
 
             const ratioB = 1 - dB / MOUSE_RADIUS;
             // 두 노드 모두 가까울수록 0.3, 멀어질수록 0.15 → 0으로 감소
-            const alpha  = ratioA * ratioB * 0.32;
+            const alpha  = ratioA * ratioB * 0.5;
 
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -90,10 +90,10 @@ export default function BackgroundNetwork() {
       }
 
       // 노드 점 렌더링
-      ctx.fillStyle = brand(0.25);
+      ctx.fillStyle = brand(0.45);
       for (const n of nodes) {
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 2, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, 3, 0, Math.PI * 2);
         ctx.fill();
       }
 

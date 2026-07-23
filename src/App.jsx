@@ -174,8 +174,9 @@ export default function App() {
   const showResultCount  = showAll || (query && !isEmpty);
 
   return (
+    <>
+    <BackgroundNetwork />
     <div className="app">
-      <BackgroundNetwork />
       <div className="app-container">
         <div className="page-title-area">
           <div className="app-title">
@@ -291,5 +292,6 @@ export default function App() {
         </>
       )}
     </div>
+    </>
   );
 }
