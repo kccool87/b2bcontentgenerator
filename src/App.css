@@ -1546,44 +1546,47 @@ ol, ul { list-style: none; }
 }
 .action-btn--loading { opacity: 0.72 !important; }
 
-/* 문구 복사 — 다크 슬레이트 */
+/* 문구 복사 */
 .action-btn--copy {
-  background: #4b5563;
-  color: #fff;
+  background: #e5e5e5;
+  color: #1a1a1a;
   border-color: transparent;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  box-shadow: none;
 }
 .action-btn--copy:hover:not(:disabled) {
-  background: #374151;
-  box-shadow: 0 2px 7px rgba(0,0,0,0.24);
+  background: rgba(132,79,249,0.13);
+  box-shadow: none;
 }
+.action-btn--copy:active:not(:disabled) { background: rgba(132,79,249,0.22); }
 .action-btn--copy-done {
   background: #065f46 !important;
   border-color: transparent !important;
   color: #fff !important;
-  box-shadow: 0 1px 4px rgba(6,95,70,0.3) !important;
+  box-shadow: none !important;
 }
 
-/* 이메일 발송 — 블루 */
+/* 이메일 발송 */
 .action-btn--email {
-  background: #2563eb;
-  color: #fff;
+  background: #e5e5e5;
+  color: #1a1a1a;
   border-color: transparent;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.28);
+  box-shadow: none;
 }
 .action-btn--email:hover:not(:disabled) {
-  background: #1d4ed8;
-  box-shadow: 0 2px 7px rgba(37,99,235,0.38);
+  background: rgba(132,79,249,0.13);
+  box-shadow: none;
 }
+.action-btn--email:active:not(:disabled) { background: rgba(132,79,249,0.22); }
 
-/* 카카오톡 — 브랜드 옐로우 유지 */
+/* 카카오톡 발송 */
 .action-btn--kakao {
-  background: #FEE500;
-  color: #191600;
-  box-shadow: 0 1px 4px rgba(254,229,0,0.38);
+  background: #e5e5e5;
+  color: #1a1a1a;
+  box-shadow: none;
 }
-.action-btn--kakao:hover:not(:disabled) { background: #f5dc00; }
-.action-btn--kakao-done { background: #e6cc00 !important; font-size: 11px; }
+.action-btn--kakao:hover:not(:disabled) { background: rgba(132,79,249,0.13); }
+.action-btn--kakao:active:not(:disabled) { background: rgba(132,79,249,0.22); }
+.action-btn--kakao-done { background: #e5e5e5 !important; color: #1a1a1a !important; font-size: 11px; }
 
 /* ══════════════════════════════════════════
    Responsive — 768px

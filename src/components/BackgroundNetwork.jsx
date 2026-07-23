@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 
-const NODE_COUNT  = 40;
-const MOUSE_RADIUS = 150;
+const NODE_COUNT   = 40;
+const MOUSE_RADIUS = 260;   // 마우스 반응 반경
+const AMBIENT_DIST = 140;   // 항상 연결되는 인접 노드 거리
 
 function brand(alpha) {
   return `rgba(132,79,249,${alpha.toFixed(3)})`;
@@ -57,7 +58,24 @@ export default function BackgroundNetwork() {
         if (n.y > h)  { n.y = h; n.vy *= -1; }
       }
 
-      // 데스크톱: 마우스 반경 내 노드들끼리 연결
+      // 항상 보이는 ambient 연결 (인접 노드끼리)
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const d  = Math.sqrt(dx * dx + dy * dy);
+          if (d > AMBIENT_DIST) continue;
+          const alpha = (1 - d / AMBIENT_DIST) * 0.1;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = brand(alpha);
+          ctx.lineWidth   = 0.6;
+          ctx.stroke();
+        }
+      }
+
+      // 데스크톱: 마우스 반경 내 노드들끼리 강조 연결
       if (!isMobile) {
         for (let i = 0; i < nodes.length; i++) {
           const a   = nodes[i];
@@ -76,14 +94,13 @@ export default function BackgroundNetwork() {
             if (dB > MOUSE_RADIUS) continue;
 
             const ratioB = 1 - dB / MOUSE_RADIUS;
-            // 두 노드 모두 가까울수록 0.3, 멀어질수록 0.15 → 0으로 감소
-            const alpha  = ratioA * ratioB * 0.5;
+            const alpha  = ratioA * ratioB * 0.55;
 
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
             ctx.strokeStyle = brand(alpha);
-            ctx.lineWidth   = 0.8;
+            ctx.lineWidth   = 1;
             ctx.stroke();
           }
         }
