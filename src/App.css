@@ -1534,11 +1534,36 @@ ol, ul { list-style: none; }
 .action-btn:active:not(:disabled) { transform: translateY(0); }
 .action-btn:disabled { opacity: 0.42; cursor: not-allowed; transform: none; }
 
-/* AI 재생성 — 브랜드 단색 (절제된 프라이머리) */
+/* Glassy shimmer for regen button */
+@keyframes glass-shimmer {
+  0%   { transform: translateX(-160%) skewX(-18deg); opacity: 0; }
+  10%  { opacity: 1; }
+  40%  { transform: translateX(220%)  skewX(-18deg); opacity: 0; }
+  100% { transform: translateX(220%)  skewX(-18deg); opacity: 0; }
+}
+
+/* AI 재생성 — 브랜드 단색 + Glassy Animation */
 .action-btn--regen {
+  position: relative;
+  overflow: hidden;
   background: var(--brand);
   color: #fff;
   box-shadow: 0 1px 5px rgba(132,79,249,0.28);
+}
+.action-btn--regen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.28) 50%,
+    transparent 100%
+  );
+  animation: glass-shimmer 3.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
 }
 .action-btn--regen:hover:not(:disabled) {
   background: var(--brand-dark);
