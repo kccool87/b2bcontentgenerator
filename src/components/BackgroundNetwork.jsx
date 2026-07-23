@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'react';
 
 const NODE_COUNT = 50;
-const MAX_CONN   = 20;    // 동시 활성 연결 수
-const MIN_DIST   = 80;    // 너무 짧은 연결 제외 (px)
-const MAX_DIST   = 420;   // 너무 먼 연결 제외 (px)
-const FADE_IN    = 0.014; // 연결선 나타나는 속도
-const FADE_OUT   = 0.009; // 연결선 사라지는 속도
-const MAX_ALPHA  = 0.4;   // 최대 불투명도
-const LIFE_MIN   = 160;   // 연결 유지 최소 프레임 — 더 안정적
-const LIFE_MAX   = 320;   // 연결 유지 최대 프레임
-const NODE_SPEED = 0.18;  // 노드 속도 낮춤 — 선 흔들림 방지
+const MAX_CONN   = 10;    // 동시 활성 연결 수
+const MIN_DIST   = 60;    // 너무 짧은 연결 제외 (px)
+const MAX_DIST   = 260;   // 선이 콘텐츠 영역을 가로지르지 않도록 짧게
+const FADE_IN    = 0.014;
+const FADE_OUT   = 0.009;
+const MAX_ALPHA  = 0.4;
+const LIFE_MIN   = 160;
+const LIFE_MAX   = 320;
+const NODE_SPEED = 0.18;
 
 function brand(alpha) {
   return `rgba(132,79,249,${alpha.toFixed(3)})`;
@@ -44,6 +44,17 @@ export default function BackgroundNetwork() {
     // 연결 풀 — { i, j, alpha, life, dying }
     const conns = [];
 
+    // 콘텐츠 카드 영역 (대략적 중앙 UI zone) — 선이 이 안을 통과하면 제외
+    function crossesContentZone(ax, ay, bx, by) {
+      const cx = (ax + bx) / 2;
+      const cy = (ay + by) / 2;
+      const zoneLeft   = w * 0.08;
+      const zoneRight  = w * 0.72;
+      const zoneTop    = h * 0.12;
+      const zoneBottom = h * 0.88;
+      return cx > zoneLeft && cx < zoneRight && cy > zoneTop && cy < zoneBottom;
+    }
+
     function spawnConn() {
       // dying 포함 모든 활성 연결을 중복 체크 — 더블링 방지
       const existing = new Set(conns.map(c => `${c.i}-${c.j}`));
@@ -53,10 +64,12 @@ export default function BackgroundNetwork() {
         if (i === j) continue;
         if (i > j) [i, j] = [j, i];
         if (existing.has(`${i}-${j}`)) continue;
-        const dx = nodes[i].x - nodes[j].x;
-        const dy = nodes[i].y - nodes[j].y;
+        const ni = nodes[i], nj = nodes[j];
+        const dx = ni.x - nj.x;
+        const dy = ni.y - nj.y;
         const d  = Math.sqrt(dx * dx + dy * dy);
         if (d < MIN_DIST || d > MAX_DIST) continue;
+        if (crossesContentZone(ni.x, ni.y, nj.x, nj.y)) continue;
         conns.push({ i, j, alpha: 0, life: randInt(LIFE_MIN, LIFE_MAX), dying: false });
         return;
       }
