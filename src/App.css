@@ -1546,47 +1546,41 @@ ol, ul { list-style: none; }
 }
 .action-btn--loading { opacity: 0.72 !important; }
 
-/* 문구 복사 */
-.action-btn--copy {
-  background: #e5e5e5;
-  color: #1a1a1a;
+/* 문구 복사 / 이메일 발송 / 카카오톡 발송 — 공통 스타일 */
+.action-btn--copy,
+.action-btn--email,
+.action-btn--kakao {
+  background: #c2c2c2;
+  color: #111111;
   border-color: transparent;
   box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.15px;
 }
-.action-btn--copy:hover:not(:disabled) {
-  background: rgba(132,79,249,0.13);
-  box-shadow: none;
+.action-btn--copy:hover:not(:disabled),
+.action-btn--email:hover:not(:disabled),
+.action-btn--kakao:hover:not(:disabled) {
+  background: rgba(132,79,249,0.18);
+  color: #3d1a8a;
 }
-.action-btn--copy:active:not(:disabled) { background: rgba(132,79,249,0.22); }
+.action-btn--copy:active:not(:disabled),
+.action-btn--email:active:not(:disabled),
+.action-btn--kakao:active:not(:disabled) {
+  background: rgba(132,79,249,0.28);
+  color: #3d1a8a;
+}
 .action-btn--copy-done {
-  background: #065f46 !important;
+  background: rgba(132,79,249,0.22) !important;
+  color: #3d1a8a !important;
   border-color: transparent !important;
-  color: #fff !important;
   box-shadow: none !important;
 }
-
-/* 이메일 발송 */
-.action-btn--email {
-  background: #e5e5e5;
-  color: #1a1a1a;
-  border-color: transparent;
-  box-shadow: none;
+.action-btn--kakao-done {
+  background: rgba(132,79,249,0.22) !important;
+  color: #3d1a8a !important;
+  font-size: 11px;
 }
-.action-btn--email:hover:not(:disabled) {
-  background: rgba(132,79,249,0.13);
-  box-shadow: none;
-}
-.action-btn--email:active:not(:disabled) { background: rgba(132,79,249,0.22); }
-
-/* 카카오톡 발송 */
-.action-btn--kakao {
-  background: #e5e5e5;
-  color: #1a1a1a;
-  box-shadow: none;
-}
-.action-btn--kakao:hover:not(:disabled) { background: rgba(132,79,249,0.13); }
-.action-btn--kakao:active:not(:disabled) { background: rgba(132,79,249,0.22); }
-.action-btn--kakao-done { background: #e5e5e5 !important; color: #1a1a1a !important; font-size: 11px; }
 
 /* ══════════════════════════════════════════
    Responsive — 768px

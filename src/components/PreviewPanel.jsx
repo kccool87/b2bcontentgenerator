@@ -457,7 +457,7 @@ export default function PreviewPanel({
             onClick={handleCopy}
             disabled={isLoading || isEmpty}
           >
-            {copied ? '✓ 복사 완료' : '문구 복사하기'}
+            {copied ? '✓ 복사 완료' : '⧉ 문구 복사하기'}
           </button>
 
           {/* 행 2: 이메일 + 카카오톡 */}
