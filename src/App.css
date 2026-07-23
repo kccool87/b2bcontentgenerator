@@ -1550,9 +1550,9 @@ ol, ul { list-style: none; }
 .action-btn--copy,
 .action-btn--email,
 .action-btn--kakao {
-  background: #c2c2c2;
+  background: #ffffff;
   color: #111111;
-  border-color: transparent;
+  border-color: var(--brand);
   box-shadow: none;
   font-size: 13px;
   font-weight: 600;
@@ -1561,24 +1561,27 @@ ol, ul { list-style: none; }
 .action-btn--copy:hover:not(:disabled),
 .action-btn--email:hover:not(:disabled),
 .action-btn--kakao:hover:not(:disabled) {
-  background: rgba(132,79,249,0.18);
+  background: rgba(132,79,249,0.1);
+  border-color: var(--brand);
   color: #3d1a8a;
 }
 .action-btn--copy:active:not(:disabled),
 .action-btn--email:active:not(:disabled),
 .action-btn--kakao:active:not(:disabled) {
-  background: rgba(132,79,249,0.28);
+  background: rgba(132,79,249,0.22);
+  border-color: var(--brand);
   color: #3d1a8a;
 }
 .action-btn--copy-done {
-  background: rgba(132,79,249,0.22) !important;
+  background: rgba(132,79,249,0.15) !important;
   color: #3d1a8a !important;
-  border-color: transparent !important;
+  border-color: var(--brand) !important;
   box-shadow: none !important;
 }
 .action-btn--kakao-done {
-  background: rgba(132,79,249,0.22) !important;
+  background: rgba(132,79,249,0.15) !important;
   color: #3d1a8a !important;
+  border-color: var(--brand) !important;
   font-size: 11px;
 }
 
