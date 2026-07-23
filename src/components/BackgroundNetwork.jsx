@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 
 const NODE_COUNT = 50;
-const MAX_CONN   = 30;    // 동시 활성 연결 수
+const MAX_CONN   = 20;    // 동시 활성 연결 수
+const MAX_DIST   = 480;   // 연결 허용 최대 거리 (px)
 const FADE_IN    = 0.018; // 연결선 나타나는 속도
 const FADE_OUT   = 0.012; // 연결선 사라지는 속도
 const MAX_ALPHA  = 0.38;  // 최대 불투명도
@@ -45,12 +46,16 @@ export default function BackgroundNetwork() {
 
     function spawnConn() {
       const existing = new Set(conns.map(c => `${c.i}-${c.j}`));
-      for (let attempt = 0; attempt < 10; attempt++) {
+      for (let attempt = 0; attempt < 20; attempt++) {
         let i = randInt(0, NODE_COUNT - 1);
         let j = randInt(0, NODE_COUNT - 1);
         if (i === j) continue;
         if (i > j) [i, j] = [j, i];
         if (existing.has(`${i}-${j}`)) continue;
+        // 너무 멀리 있는 노드는 연결 제외
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        if (Math.sqrt(dx * dx + dy * dy) > MAX_DIST) continue;
         conns.push({ i, j, alpha: 0, life: randInt(LIFE_MIN, LIFE_MAX), dying: false });
         return;
       }
