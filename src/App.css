@@ -725,6 +725,25 @@ ol, ul { list-style: none; }
   margin-bottom: 8px;
   line-height: 1.5;
   word-break: keep-all;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.card-title-text { flex: 1; }
+.card-title-link {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-4);
+  text-decoration: none;
+  line-height: 1;
+  padding: 1px 4px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+.card-title-link:hover {
+  color: var(--brand);
+  background: var(--brand-light);
 }
 
 .recommend-box {
@@ -1395,10 +1414,14 @@ ol, ul { list-style: none; }
   white-space: nowrap;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.reset-to-ai-btn:hover {
+.reset-to-ai-btn:hover:not(:disabled) {
   background: var(--brand);
   color: #fff;
   border-color: var(--brand);
+}
+.reset-to-ai-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 /* ══════════════════════════════════════════

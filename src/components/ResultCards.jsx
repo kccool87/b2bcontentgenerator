@@ -292,7 +292,21 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
                       </div>
                     </div>
 
-                    <h3 className="card-title">{cleanTitle(item.title)}</h3>
+                    <h3 className="card-title">
+                      <span className="card-title-text">{cleanTitle(item.title)}</span>
+                      {item.url && (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="card-title-link"
+                          onClick={(e) => e.stopPropagation()}
+                          title="블로그에서 보기"
+                        >
+                          →
+                        </a>
+                      )}
+                    </h3>
 
                     <div className="recommend-box">
                       <span className="recommend-icon">💡</span>

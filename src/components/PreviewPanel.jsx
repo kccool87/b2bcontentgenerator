@@ -473,11 +473,13 @@ export default function PreviewPanel({
               <button className="edit-done-btn" onClick={() => setIsEditing(false)}>
                 완료
               </button>
-              {canResetToAI && (
-                <button className="reset-to-ai-btn" onClick={handleResetToAI}>
-                  AI 문구로 되돌리기
-                </button>
-              )}
+              <button
+                className="reset-to-ai-btn"
+                onClick={handleResetToAI}
+                disabled={!canResetToAI}
+              >
+                문구 되돌리기
+              </button>
             </div>
           )}
         </div>
