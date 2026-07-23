@@ -1296,6 +1296,74 @@ ol, ul { list-style: none; }
   background: rgba(255,255,255,0.35);
 }
 
+/* 뷰 모드 — 하이퍼링크 활성화 */
+.preview-full-view {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-size: 13px;
+  line-height: 1.8;
+  font-family: inherit;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(132,79,249,0.3) transparent;
+  padding: 2px;
+}
+.preview-link {
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+.preview-link:hover { color: var(--brand-dark); }
+
+/* 문구 수정하기 버튼 */
+.edit-text-btn {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  color: var(--text-3);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.edit-text-btn:hover:not(:disabled) {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+.edit-text-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* 편집 모드 버튼 묶음 */
+.edit-action-btns {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.edit-done-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--brand);
+  color: var(--brand);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.edit-done-btn:hover {
+  background: var(--brand);
+  color: #fff;
+}
+
 /* 스트리밍 텍스트 표시 */
 .preview-streaming {
   font-size: 12px;
@@ -1498,6 +1566,7 @@ ol, ul { list-style: none; }
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+  .mobile-sheet-content .preview-full-view,
   .mobile-sheet-content .preview-full-textarea {
     flex: 1;
     height: 100%;

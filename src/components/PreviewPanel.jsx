@@ -267,6 +267,7 @@ export default function PreviewPanel({
   const [fullMessengerText, setFullMessengerText] = useState('');
   const [userEditedEmail,   setUserEditedEmail]   = useState(false);
   const [userEditedMessenger, setUserEditedMessenger] = useState(false);
+  const [isEditing,         setIsEditing]         = useState(false);
 
   const isEmpty = !selectedContents || selectedContents.length === 0;
 
@@ -296,6 +297,7 @@ export default function PreviewPanel({
     setFullMessengerText(buildMessengerCopy(selectedContents, msgGreeting, msgIntro));
     setUserEditedEmail(false);
     setUserEditedMessenger(false);
+    setIsEditing(false);
   }, [geminiMessage, emailGreeting, emailClosing, msgGreeting]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleResetToAI() {
@@ -306,9 +308,10 @@ export default function PreviewPanel({
     setFullMessengerText(buildMessengerCopy(selectedContents, msgGreeting, msgIntro));
     setUserEditedEmail(false);
     setUserEditedMessenger(false);
+    setIsEditing(false);
   }
 
-  const showResetBtn = !!geminiMessage && !geminiMessage.rateLimited && (userEditedEmail || userEditedMessenger);
+  const canResetToAI = !!geminiMessage && !geminiMessage.rateLimited && (userEditedEmail || userEditedMessenger);
 
   function getCopyText() {
     if (activeTab === 'email')     return fullEmailText;
@@ -335,6 +338,16 @@ export default function PreviewPanel({
   }
 
   const isStreaming = isLoading && !!streamingText;
+
+  // 텍스트 내 URL을 클릭 가능한 링크로 변환
+  function renderWithLinks(text) {
+    if (!text) return null;
+    return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+      /^https?:\/\//.test(part)
+        ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="preview-link">{part}</a>
+        : part
+    );
+  }
 
   return (
     <div className="preview-panel">
@@ -407,20 +420,34 @@ export default function PreviewPanel({
         ) : (
           <>
             {activeTab === 'email' && (
-              <textarea
-                className="preview-full-textarea"
-                value={fullEmailText}
-                onChange={(e) => { setFullEmailText(e.target.value); setUserEditedEmail(true); }}
-                spellCheck={false}
-              />
+              isEditing ? (
+                <textarea
+                  className="preview-full-textarea"
+                  value={fullEmailText}
+                  onChange={(e) => { setFullEmailText(e.target.value); setUserEditedEmail(true); }}
+                  spellCheck={false}
+                  autoFocus
+                />
+              ) : (
+                <div className="preview-full-view">
+                  {renderWithLinks(fullEmailText)}
+                </div>
+              )
             )}
             {activeTab === 'messenger' && (
-              <textarea
-                className="preview-full-textarea"
-                value={fullMessengerText}
-                onChange={(e) => { setFullMessengerText(e.target.value); setUserEditedMessenger(true); }}
-                spellCheck={false}
-              />
+              isEditing ? (
+                <textarea
+                  className="preview-full-textarea"
+                  value={fullMessengerText}
+                  onChange={(e) => { setFullMessengerText(e.target.value); setUserEditedMessenger(true); }}
+                  spellCheck={false}
+                  autoFocus
+                />
+              ) : (
+                <div className="preview-full-view">
+                  {renderWithLinks(fullMessengerText)}
+                </div>
+              )
             )}
             {activeTab === 'url' && (
               <UrlPreview items={selectedContents} />
@@ -433,10 +460,25 @@ export default function PreviewPanel({
       <div className="copy-action-area">
         <div className="copy-action-hint-row">
           <p className="copy-action-hint">✦ 클릭할 때마다 새로운 AI 문구가 생성됩니다.</p>
-          {showResetBtn && (
-            <button className="reset-to-ai-btn" onClick={handleResetToAI} title="AI가 생성한 원본 문구로 되돌립니다">
-              AI 문구로 되돌리기
+          {!isEditing ? (
+            <button
+              className="edit-text-btn"
+              onClick={() => setIsEditing(true)}
+              disabled={isEmpty || isLoading}
+            >
+              ✎ 문구 수정하기
             </button>
+          ) : (
+            <div className="edit-action-btns">
+              <button className="edit-done-btn" onClick={() => setIsEditing(false)}>
+                완료
+              </button>
+              {canResetToAI && (
+                <button className="reset-to-ai-btn" onClick={handleResetToAI}>
+                  AI 문구로 되돌리기
+                </button>
+              )}
+            </div>
           )}
         </div>
         <div className="action-grid">
