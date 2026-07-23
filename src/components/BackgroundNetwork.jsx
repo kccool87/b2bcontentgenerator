@@ -1,20 +1,13 @@
 import { useEffect, useRef } from 'react';
 
-const NODE_COUNT = 50;
-const MAX_CONN   = 30;    // 동시 활성 연결 수
-const FADE_IN    = 0.018; // 연결선 나타나는 속도
-const FADE_OUT   = 0.012; // 연결선 사라지는 속도
-const MAX_ALPHA  = 0.38;  // 최대 불투명도
-const LIFE_MIN   = 90;    // 연결 유지 최소 프레임
-const LIFE_MAX   = 220;   // 연결 유지 최대 프레임
-const NODE_SPEED = 0.65;  // 노드 이동 속도
+const NODE_COUNT     = 50;
+const TRACER_COUNT   = 3;
+const TRAVEL_SPEED   = 0.06;  // 프레임당 이동 — 약 0.27초에 노드 하나 통과
+const TRAIL_FADE     = 0.025; // 꼬리 페이드 속도
+const TRAIL_ALPHA    = 0.55;  // 꼬리 초기 알파
 
 function brand(alpha) {
   return `rgba(132,79,249,${alpha.toFixed(3)})`;
-}
-
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export default function BackgroundNetwork() {
@@ -32,77 +25,93 @@ export default function BackgroundNetwork() {
     resize();
     window.addEventListener('resize', resize);
 
-    // 노드 — 더 빠른 속도
+    // 배경 떠다니는 노드
     const nodes = Array.from({ length: NODE_COUNT }, () => ({
       x:  Math.random() * window.innerWidth,
       y:  Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * NODE_SPEED * 2,
-      vy: (Math.random() - 0.5) * NODE_SPEED * 2,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
     }));
 
-    // 연결 풀 — { i, j, alpha, life, dying }
-    const conns = [];
-
-    function spawnConn() {
-      // 이미 연결된 쌍 중복 방지
-      const existing = new Set(conns.map(c => `${c.i}-${c.j}`));
-      for (let attempt = 0; attempt < 10; attempt++) {
-        let i = randInt(0, NODE_COUNT - 1);
-        let j = randInt(0, NODE_COUNT - 1);
-        if (i === j) continue;
-        if (i > j) [i, j] = [j, i];
-        if (existing.has(`${i}-${j}`)) continue;
-        conns.push({ i, j, alpha: 0, life: randInt(LIFE_MIN, LIFE_MAX), dying: false });
-        return;
-      }
+    function randNode(exclude = -1) {
+      let n;
+      do { n = Math.floor(Math.random() * NODE_COUNT); } while (n === exclude);
+      return n;
     }
 
-    // 초기 연결 미리 채우기
-    for (let k = 0; k < MAX_CONN; k++) spawnConn();
+    // 3개 트레이서 — 각각 노드 사이를 빠르게 이동
+    const tracers = Array.from({ length: TRACER_COUNT }, (_, k) => ({
+      from:     randNode(),
+      to:       randNode(),
+      progress: k / TRACER_COUNT, // 위상 분산
+      trail:    [],               // [{ fromX, fromY, toX, toY, alpha }]
+    }));
 
     function frame() {
       ctx.clearRect(0, 0, w, h);
 
       // 노드 이동
       for (const n of nodes) {
-        n.x += n.vx;
-        n.y += n.vy;
+        n.x += n.vx; n.y += n.vy;
         if (n.x < 0)  { n.x = 0; n.vx *= -1; }
         if (n.x > w)  { n.x = w; n.vx *= -1; }
         if (n.y < 0)  { n.y = 0; n.vy *= -1; }
         if (n.y > h)  { n.y = h; n.vy *= -1; }
       }
 
-      // 연결 업데이트 & 렌더
-      for (let k = conns.length - 1; k >= 0; k--) {
-        const c = conns[k];
-
-        if (c.dying) {
-          c.alpha -= FADE_OUT;
-          if (c.alpha <= 0) { conns.splice(k, 1); continue; }
-        } else {
-          c.alpha = Math.min(c.alpha + FADE_IN, MAX_ALPHA);
-          c.life--;
-          if (c.life <= 0) c.dying = true;
-        }
-
-        const a = nodes[c.i], b = nodes[c.j];
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.strokeStyle = brand(c.alpha);
-        ctx.lineWidth   = 0.9;
-        ctx.stroke();
-      }
-
-      // 빈 슬롯 채우기
-      while (conns.length < MAX_CONN) spawnConn();
-
-      // 노드 점
-      ctx.fillStyle = brand(0.45);
+      // 배경 노드 점
+      ctx.fillStyle = brand(0.35);
       for (const n of nodes) {
         ctx.beginPath();
         ctx.arc(n.x, n.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 트레이서 업데이트 & 렌더
+      for (const t of tracers) {
+        const fa = nodes[t.from];
+        const fb = nodes[t.to];
+
+        // 진행
+        t.progress += TRAVEL_SPEED;
+
+        if (t.progress >= 1) {
+          // 도착 — 꼬리에 완성된 선분 추가
+          t.trail.push({ fromX: fa.x, fromY: fa.y, toX: fb.x, toY: fb.y, alpha: TRAIL_ALPHA });
+          t.from     = t.to;
+          t.to       = randNode(t.from);
+          t.progress = 0;
+        }
+
+        // 꼬리 페이드 & 렌더
+        for (let i = t.trail.length - 1; i >= 0; i--) {
+          const s = t.trail[i];
+          s.alpha -= TRAIL_FADE;
+          if (s.alpha <= 0) { t.trail.splice(i, 1); continue; }
+          ctx.beginPath();
+          ctx.moveTo(s.fromX, s.fromY);
+          ctx.lineTo(s.toX,   s.toY);
+          ctx.strokeStyle = brand(s.alpha);
+          ctx.lineWidth   = 1.2;
+          ctx.stroke();
+        }
+
+        // 현재 이동 중인 선 (헤드 → 목표 방향으로 성장)
+        const p  = t.progress;
+        const cx = fa.x + (fb.x - fa.x) * p;
+        const cy = fa.y + (fb.y - fa.y) * p;
+
+        ctx.beginPath();
+        ctx.moveTo(fa.x, fa.y);
+        ctx.lineTo(cx, cy);
+        ctx.strokeStyle = brand(0.8);
+        ctx.lineWidth   = 1.5;
+        ctx.stroke();
+
+        // 헤드 글로우 점
+        ctx.beginPath();
+        ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = brand(1);
         ctx.fill();
       }
 
