@@ -2,13 +2,14 @@ import { useEffect, useRef } from 'react';
 
 const NODE_COUNT = 50;
 const MAX_CONN   = 20;    // 동시 활성 연결 수
-const MAX_DIST   = 480;   // 연결 허용 최대 거리 (px)
-const FADE_IN    = 0.018; // 연결선 나타나는 속도
-const FADE_OUT   = 0.012; // 연결선 사라지는 속도
-const MAX_ALPHA  = 0.38;  // 최대 불투명도
-const LIFE_MIN   = 90;    // 연결 유지 최소 프레임
-const LIFE_MAX   = 220;   // 연결 유지 최대 프레임
-const NODE_SPEED = 0.65;  // 노드 이동 속도
+const MIN_DIST   = 80;    // 너무 짧은 연결 제외 (px)
+const MAX_DIST   = 420;   // 너무 먼 연결 제외 (px)
+const FADE_IN    = 0.014; // 연결선 나타나는 속도
+const FADE_OUT   = 0.009; // 연결선 사라지는 속도
+const MAX_ALPHA  = 0.4;   // 최대 불투명도
+const LIFE_MIN   = 160;   // 연결 유지 최소 프레임 — 더 안정적
+const LIFE_MAX   = 320;   // 연결 유지 최대 프레임
+const NODE_SPEED = 0.18;  // 노드 속도 낮춤 — 선 흔들림 방지
 
 function brand(alpha) {
   return `rgba(132,79,249,${alpha.toFixed(3)})`;
@@ -33,29 +34,29 @@ export default function BackgroundNetwork() {
     resize();
     window.addEventListener('resize', resize);
 
-    // 노드 — 빠른 속도
     const nodes = Array.from({ length: NODE_COUNT }, () => ({
       x:  Math.random() * window.innerWidth,
       y:  Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * NODE_SPEED * 2,
-      vy: (Math.random() - 0.5) * NODE_SPEED * 2,
+      vx: (Math.random() - 0.5) * NODE_SPEED,
+      vy: (Math.random() - 0.5) * NODE_SPEED,
     }));
 
     // 연결 풀 — { i, j, alpha, life, dying }
     const conns = [];
 
     function spawnConn() {
+      // dying 포함 모든 활성 연결을 중복 체크 — 더블링 방지
       const existing = new Set(conns.map(c => `${c.i}-${c.j}`));
-      for (let attempt = 0; attempt < 20; attempt++) {
+      for (let attempt = 0; attempt < 30; attempt++) {
         let i = randInt(0, NODE_COUNT - 1);
         let j = randInt(0, NODE_COUNT - 1);
         if (i === j) continue;
         if (i > j) [i, j] = [j, i];
         if (existing.has(`${i}-${j}`)) continue;
-        // 너무 멀리 있는 노드는 연결 제외
         const dx = nodes[i].x - nodes[j].x;
         const dy = nodes[i].y - nodes[j].y;
-        if (Math.sqrt(dx * dx + dy * dy) > MAX_DIST) continue;
+        const d  = Math.sqrt(dx * dx + dy * dy);
+        if (d < MIN_DIST || d > MAX_DIST) continue;
         conns.push({ i, j, alpha: 0, life: randInt(LIFE_MIN, LIFE_MAX), dying: false });
         return;
       }
