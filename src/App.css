@@ -735,19 +735,23 @@ ol, ul { list-style: none; }
 .card-title-text { flex: 1; }
 .card-title-link {
   flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text-4);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--brand);
   text-decoration: none;
-  line-height: 1;
-  padding: 1px 4px;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(132,79,249,0.08);
+  border: 1px solid rgba(132,79,249,0.25);
+  white-space: nowrap;
+  line-height: 1.6;
+  transition: color 0.15s, background 0.15s, border-color 0.15s, transform 0.08s;
 }
 .card-title-link:hover {
-  color: var(--brand);
-  background: var(--brand-light);
+  background: rgba(132,79,249,0.18);
+  border-color: var(--brand);
 }
+.card-title-link:active { transform: scale(0.93); }
 
 .recommend-box {
   display: flex;

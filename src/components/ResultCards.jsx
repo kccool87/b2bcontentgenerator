@@ -163,7 +163,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
         onTouchEnd={onTabTouchEnd}
       >
         <button
-          className={`type-filter-btn type-filter--all${showAll && !activeType ? ' type-filter-btn--active' : ''}`}
+          className={`type-filter-btn type-filter--all${!activeType ? ' type-filter-btn--active' : ''}`}
           onClick={() => guardClick(() => { onToggleAll(); setActiveType(null); setSortMode(null); onTabClick?.(); })}
         >
           전체 {totalCount > 0 && <span className="filter-btn-count">{totalCount}</span>}
@@ -303,7 +303,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
                           onClick={(e) => e.stopPropagation()}
                           title="블로그에서 보기"
                         >
-                          →
+                          보기 →
                         </a>
                       )}
                     </h3>
