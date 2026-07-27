@@ -337,6 +337,15 @@ export default function PreviewPanel({
     window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullEmailText)}`, '_self');
   }
 
+  // 재생성 — 인삿말·맺음말 재추첨 후 AI 호출
+  function handleRegen() {
+    const key = stageKey(relationshipStage);
+    setEmailGreeting(pick(EMAIL_GREETINGS[key]));
+    setMsgGreeting(pick(MESSENGER_GREETINGS[key]));
+    setEmailClosing(pick(EMAIL_CLOSINGS[key]));
+    onGenerateAI();
+  }
+
   const isStreaming = isLoading && !!streamingText;
 
   // 텍스트 내 URL을 클릭 가능한 링크로 변환
@@ -487,7 +496,7 @@ export default function PreviewPanel({
           {/* 행 1: AI 재생성 + 문구 복사 */}
           <button
             className={`action-btn action-btn--regen${isLoading ? ' action-btn--loading' : ''}`}
-            onClick={onGenerateAI}
+            onClick={handleRegen}
             disabled={isLoading || isEmpty}
             title="현재 관계 단계 설정으로 AI 문구를 새로 생성합니다"
           >
