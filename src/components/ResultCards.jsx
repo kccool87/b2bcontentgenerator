@@ -303,7 +303,7 @@ export default function ResultCards({ results, allResults, selectedIds, onToggle
                           onClick={(e) => e.stopPropagation()}
                           title="블로그에서 보기"
                         >
-                          원문보기 ↗
+                          원문 ↗
                         </a>
                       )}
                     </h3>

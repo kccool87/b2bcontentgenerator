@@ -142,7 +142,7 @@ export default function App() {
     resetGemini();
   }
 
-  // "다시 생성" 버튼 클릭 — 관계 단계 포함
+  // "다시 생성" 버튼 클릭 — 캐시 무효화 후 강제 재생성
   async function handleGenerateAI() {
     if (selectedContents.length === 0) return;
     const prods = [...new Set(selectedContents.flatMap((c) => c.products))];
@@ -152,7 +152,7 @@ export default function App() {
       selectedProducts:  prods,
       selectedIndustries: inds,
       relationshipStage,
-    });
+    }, true);
   }
 
   // 관계 단계 변경 — 콘텐츠 선택 중이면 즉시 재생성

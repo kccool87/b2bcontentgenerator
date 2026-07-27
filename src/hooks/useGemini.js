@@ -138,14 +138,16 @@ export function useGemini() {
   const abortRef                        = useRef(null);
   const cacheRef                        = useRef(new Map()); // 세션 내 메모리 캐시
 
-  async function generate(contents, context = {}) {
+  async function generate(contents, context = {}, forceRegen = false) {
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    // 캐시 히트 — API 호출 없이 즉시 반환
+    // 캐시 히트 — API 호출 없이 즉시 반환 (재생성 시에는 캐시 무효화)
     const cacheKey = buildCacheKey(contents, context);
-    if (cacheRef.current.has(cacheKey)) {
+    if (forceRegen) {
+      cacheRef.current.delete(cacheKey);
+    } else if (cacheRef.current.has(cacheKey)) {
       setMessage(cacheRef.current.get(cacheKey));
       setIsLoading(false);
       setStreamingText('');
