@@ -735,23 +735,27 @@ ol, ul { list-style: none; }
 .card-title-text { flex: 1; }
 .card-title-link {
   flex-shrink: 0;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--brand);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #fff;
   text-decoration: none;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(132,79,249,0.08);
-  border: 1px solid rgba(132,79,249,0.25);
+  padding: 3px 9px;
+  border-radius: 5px;
+  background: var(--brand);
   white-space: nowrap;
-  line-height: 1.6;
-  transition: color 0.15s, background 0.15s, border-color 0.15s, transform 0.08s;
+  line-height: 1.5;
+  box-shadow: 0 1px 4px rgba(132,79,249,0.30);
+  transition: background 0.15s, box-shadow 0.15s, transform 0.08s;
 }
 .card-title-link:hover {
-  background: rgba(132,79,249,0.18);
-  border-color: var(--brand);
+  background: var(--brand-dark, #6d3fd4);
+  box-shadow: 0 2px 8px rgba(132,79,249,0.40);
 }
-.card-title-link:active { transform: scale(0.93); }
+.card-title-link:active { transform: scale(0.93); box-shadow: none; }
 
 .recommend-box {
   display: flex;
