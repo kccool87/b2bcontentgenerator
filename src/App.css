@@ -355,6 +355,7 @@ ol, ul { list-style: none; }
   border-color: var(--brand-dark);
   color: #fff;
 }
+.sort-btn:active:not(:disabled) { transform: scale(0.93); }
 .sort-btn:disabled { opacity: 0.28; cursor: not-allowed; }
 .sort-check { font-size: 10px; font-weight: 800; margin-right: 1px; }
 
@@ -473,6 +474,7 @@ ol, ul { list-style: none; }
   white-space: nowrap;
 }
 .type-filter-btn:hover:not(:disabled):not(.type-filter-btn--active) { transform: translateY(-1px); box-shadow: var(--shadow-xs); }
+.type-filter-btn:active:not(:disabled) { transform: scale(0.94); transition: transform 0.08s; }
 .type-filter-btn--empty { opacity: 0.3; cursor: not-allowed; }
 
 .filter-btn-count {
@@ -569,6 +571,7 @@ ol, ul { list-style: none; }
   color: var(--brand);
   background: var(--brand-light);
 }
+.load-more-btn:active { transform: scale(0.96); transition: transform 0.08s; }
 .load-more-remain {
   font-size: 11px;
   font-weight: 400;
@@ -1186,7 +1189,7 @@ ol, ul { list-style: none; }
   filter: brightness(1.1);
   transform: translateY(-1px);
 }
-.ai-regen-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(0.95); }
+.ai-regen-btn:active:not(:disabled) { transform: scale(0.95); filter: brightness(0.95); }
 .ai-regen-btn:disabled {
   opacity: 0.38;
   cursor: not-allowed;
@@ -1274,9 +1277,10 @@ ol, ul { list-style: none; }
   cursor: pointer;
   white-space: nowrap;
   text-align: center;
-  transition: background 0.14s, color 0.14s, box-shadow 0.14s;
+  transition: background 0.14s, color 0.14s, box-shadow 0.14s, transform 0.08s;
   line-height: 1.3;
 }
+.stage-btn:active { transform: scale(0.93); }
 .stage-btn:hover:not(.stage-btn--active) {
   color: var(--brand);
   background: rgba(255,255,255,0.55);
@@ -1351,13 +1355,14 @@ ol, ul { list-style: none; }
   background: transparent;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.08s;
 }
 .edit-text-btn:hover:not(:disabled) {
   background: var(--brand);
   color: #fff;
   border-color: var(--brand);
 }
+.edit-text-btn:active:not(:disabled) { transform: scale(0.93); }
 .edit-text-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* 편집 모드 버튼 묶음 */
@@ -1376,12 +1381,13 @@ ol, ul { list-style: none; }
   background: transparent;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, transform 0.08s;
 }
 .edit-done-btn:hover {
   background: var(--brand);
   color: #fff;
 }
+.edit-done-btn:active { transform: scale(0.93); }
 
 /* 스트리밍 텍스트 표시 */
 .preview-streaming {
@@ -1412,13 +1418,14 @@ ol, ul { list-style: none; }
   border-radius: var(--r-xl);
   padding: 3px 10px;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.08s;
 }
 .reset-to-ai-btn:hover:not(:disabled) {
   background: var(--brand);
   color: #fff;
   border-color: var(--brand);
 }
+.reset-to-ai-btn:active:not(:disabled) { transform: scale(0.93); }
 .reset-to-ai-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
@@ -1469,6 +1476,7 @@ ol, ul { list-style: none; }
 }
 .mobile-sticky-btn:active {
   background: var(--brand-dark);
+  transform: scale(0.96);
 }
 
 /* ══════════════════════════════════════════
@@ -1623,7 +1631,7 @@ ol, ul { list-style: none; }
   transition: background 0.14s, border-color 0.14s, transform 0.11s, box-shadow 0.14s;
 }
 .action-btn:hover:not(:disabled) { transform: translateY(-1px); }
-.action-btn:active:not(:disabled) { transform: translateY(0); }
+.action-btn:active:not(:disabled) { transform: scale(0.94); }
 .action-btn:disabled { opacity: 0.42; cursor: not-allowed; transform: none; }
 
 /* Glassy shimmer for regen button */
