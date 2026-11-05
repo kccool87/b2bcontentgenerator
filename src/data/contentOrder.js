@@ -1,6 +1,18 @@
 // 각 카테고리 최신 등록순 — build-content-order.mjs 로 자동 생성
 
 export const INSIGHT_ORDER = [
+  'c346',
+  'c347',
+  'c348',
+  'c349',
+  'c350',
+  'c351',
+  'c352',
+  'c353',
+  'c354',
+  'c355',
+  'c356',
+  'c357',
   'c331',
   'c332',
   'c333',
@@ -35,6 +47,11 @@ export const INSIGHT_ORDER = [
 ];
 
 export const SOLUTION_ORDER = [
+  'c358',
+  'c359',
+  'c360',
+  'c361',
+  'c362',
   'c335',
   'c336',
   'c328',
@@ -130,6 +147,10 @@ export const SOLUTION_ORDER = [
 ];
 
 export const CHECKLIST_ORDER = [
+  'c363',
+  'c364',
+  'c365',
+  'c366',
   'c337',
   'c330',
   'c024',
@@ -154,6 +175,13 @@ export const CHECKLIST_ORDER = [
 ];
 
 export const CASE_ORDER = [
+  'c367',
+  'c368',
+  'c369',
+  'c370',
+  'c371',
+  'c372',
+  'c373',
   'c338',
   'c339',
   'c340',
@@ -171,6 +199,14 @@ export const CASE_ORDER = [
 ];
 
 export const AX_TREND_ORDER = [
+  'c374',
+  'c375',
+  'c376',
+  'c377',
+  'c378',
+  'c379',
+  'c380',
+  'c381',
   'c343',
   'c344',
   'c345',
