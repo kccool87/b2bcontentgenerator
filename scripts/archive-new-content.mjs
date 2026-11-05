@@ -259,9 +259,10 @@ function appendToContentData(entries) {
   const filePath = path.join(ROOT, 'src', 'data', 'contentData.js');
   let src = fs.readFileSync(filePath, 'utf8');
 
-  // 마지막 ]; 바로 앞에 삽입
-  const insertPos = src.lastIndexOf('];');
-  if (insertPos === -1) throw new Error('contentData.js 형식 오류: ]; 없음');
+  // contentData 배열의 닫는 ]; 바로 앞에 삽입
+  // (파일 끝의 CONCERNS 등 다른 배열에 들어가지 않도록 PRODUCTS 선언 직전의 ];를 찾음)
+  const insertPos = src.search(/\];\s*export const PRODUCTS/);
+  if (insertPos === -1) throw new Error('contentData.js 형식 오류: contentData 배열 끝(];) 없음');
 
   const prefix = src.slice(0, insertPos).trimEnd();
   const suffix = src.slice(insertPos);
